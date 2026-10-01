@@ -1,0 +1,61 @@
+# Cloudflare Pages Custom MIME Types & Asset Headers
+
+/assets/*.js
+  Content-Type: text/javascript; charset=utf-8
+
+/*.js
+  Content-Type: text/javascript; charset=utf-8
+
+/assets/*.css
+  Content-Type: text/css; charset=utf-8
+
+/*.css
+  Content-Type: text/css; charset=utf-8
+
+/assets/*.json
+  Content-Type: application/json; charset=utf-8
+
+/*.json
+  Content-Type: application/json; charset=utf-8
+
+/assets/*.svg
+  Content-Type: image/svg+xml
+
+/*.svg
+  Content-Type: image/svg+xml
+
+/assets/*.png
+  Content-Type: image/png
+
+/*.png
+  Content-Type: image/png
+
+/assets/*.jpg
+  Content-Type: image/jpeg
+
+/*.jpg
+  Content-Type: image/jpeg
+
+/assets/*.jpeg
+  Content-Type: image/jpeg
+
+/*.jpeg
+  Content-Type: image/jpeg
+
+/assets/*.webp
+  Content-Type: image/webp
+
+/*.webp
+  Content-Type: image/webp
+
+/assets/*.ico
+  Content-Type: image/x-icon
+
+/*.ico
+  Content-Type: image/x-icon
+
+/assets/*.woff2
+  Content-Type: font/woff2
+
+/*.woff2
+  Content-Type: font/woff2
