@@ -1,0 +1,46 @@
+import { AdminTeamMember } from '../../types/admin';
+
+export const initialMockTeamMembers: AdminTeamMember[] = [
+  {
+    id: 'team-1',
+    name: 'Demo Executive Director',
+    position: 'Executive Director (Demo)',
+    bio: 'Oversees organizational stewardship, community outreach coordination, and strategic governance in Khyber Pakhtunkhwa.',
+    email: 'executive.director@hopetogether.example',
+    linkedinUrl: 'https://linkedin.com',
+    facebookUrl: 'https://facebook.com',
+    displayOrder: 1,
+    isActive: true,
+    category: 'Leadership',
+  },
+  {
+    id: 'team-2',
+    name: 'Demo Program Coordinator',
+    position: 'Program Manager (Demo)',
+    bio: 'Coordinates grassroots community development, youth workshops, and field initiatives.',
+    email: 'programs@hopetogether.example',
+    linkedinUrl: 'https://linkedin.com',
+    displayOrder: 2,
+    isActive: true,
+    category: 'Leadership',
+  },
+  {
+    id: 'team-3',
+    name: 'Demo Field Officer',
+    position: 'Community Liaison Officer (Demo)',
+    bio: 'Facilitates direct community dialogues and localized educational sessions across regional clusters.',
+    email: 'field.liaison@hopetogether.example',
+    displayOrder: 3,
+    isActive: true,
+    category: 'Team',
+  },
+  {
+    id: 'team-4',
+    name: 'Demo Youth Mentor',
+    position: 'Lead Volunteer Mentor (Demo)',
+    bio: 'Supports youth leadership circles and grassroots environmental tree-planting drives.',
+    displayOrder: 4,
+    isActive: true,
+    category: 'Volunteers',
+  },
+];

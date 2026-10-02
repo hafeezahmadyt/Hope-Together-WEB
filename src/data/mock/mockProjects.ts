@@ -1,0 +1,45 @@
+import { AdminProject } from '../../types/admin';
+
+export const initialMockProjects: AdminProject[] = [
+  {
+    id: 'proj-1',
+    title: 'Sample Vocational Skill Incubation (Demo)',
+    slug: 'sample-vocational-skill-incubation',
+    objective: 'Youth Empowerment',
+    description: 'A mock project framework dedicated to delivering technical apprenticeships and responsible citizenship classes for young people.',
+    location: 'Central Khyber Pakhtunkhwa',
+    startDate: '2026-06-01',
+    endDate: '2027-05-31',
+    status: 'Published',
+  },
+  {
+    id: 'proj-2',
+    title: 'Sample Legal Awareness & Dignity Initiative (Demo)',
+    slug: 'sample-legal-awareness-dignity-initiative',
+    objective: 'Women Empowerment & Protection',
+    description: 'A structured educational curriculum informing rural communities on constitutional rights, domestic safety, and financial self-sufficiency.',
+    location: 'District Communities (Demo)',
+    startDate: '2026-08-15',
+    status: 'Published',
+  },
+  {
+    id: 'proj-3',
+    title: 'Sample Child Mentoring & Protection Circles (Demo)',
+    slug: 'sample-child-mentoring-protection-circles',
+    objective: 'Child Rights & Protection',
+    description: 'Community-led monitoring circles providing vulnerable children with educational tutoring and emotional welfare support.',
+    location: 'Regional Hubs (Demo)',
+    startDate: '2026-09-01',
+    status: 'Published',
+  },
+  {
+    id: 'proj-4',
+    title: 'Sample Grassroots Flood Resilience Pilot (Demo)',
+    slug: 'sample-grassroots-flood-resilience-pilot',
+    objective: 'Climate Change & Environmental Action',
+    description: 'Developing localized disaster emergency response volunteers and watershed conservation awareness.',
+    location: 'Riverine Zones, KP',
+    startDate: '2026-10-01',
+    status: 'Draft',
+  },
+];
