@@ -1,5 +1,5 @@
 import React from 'react';
-import { User, Linkedin, Twitter, Mail } from 'lucide-react';
+import { User, Linkedin, Twitter, Mail, Instagram, Facebook } from 'lucide-react';
 import { TeamMember } from '../types';
 
 interface TeamMemberCardProps {
@@ -61,11 +61,15 @@ export const TeamMemberCard: React.FC<TeamMemberCardProps> = ({
                 aria-label={`${member.name} on ${link.platform}`}
               >
                 {link.platform.toLowerCase() === 'linkedin' ? (
-                  <Linkedin className="w-4 h-4" />
+                  <Linkedin className="w-4 h-4 hover:text-[#0A66C2]" />
+                ) : link.platform.toLowerCase() === 'instagram' ? (
+                  <Instagram className="w-4 h-4 hover:text-[#E4405F]" />
+                ) : link.platform.toLowerCase() === 'facebook' ? (
+                  <Facebook className="w-4 h-4 hover:text-[#1877F2]" />
                 ) : link.platform.toLowerCase() === 'twitter' ? (
-                  <Twitter className="w-4 h-4" />
+                  <Twitter className="w-4 h-4 hover:text-[#1DA1F2]" />
                 ) : (
-                  <Mail className="w-4 h-4" />
+                  <Mail className="w-4 h-4 hover:text-[#1D70B8]" />
                 )}
               </a>
             ))}

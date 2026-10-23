@@ -45,6 +45,7 @@ export interface AdminTeamMember {
   email?: string;
   linkedinUrl?: string;
   facebookUrl?: string;
+  instagramUrl?: string;
   displayOrder: number;
   isActive: boolean;
   category: AdminTeamCategory | 'Leadership' | 'Team' | 'Volunteers' | string;

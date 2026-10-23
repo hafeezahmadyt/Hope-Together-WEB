@@ -5,7 +5,7 @@ import { ArrowRight, Shield, Users } from 'lucide-react';
 import { SEO } from '../components/SEO';
 import { PageHero } from '../components/PageHero';
 import { TeamMemberCard } from '../components/TeamMemberCard';
-import { teamCategories } from '../data/team';
+import { teamCategories, teamMembersData } from '../data/team';
 
 export const TeamPage: React.FC = () => {
   return (
@@ -40,6 +40,7 @@ export const TeamPage: React.FC = () => {
           const isExecutive = cat.id === 'Executive Body' || cat.id === 'Leadership';
           const Icon = isExecutive ? Shield : Users;
           const accentColor = isExecutive ? 'text-[#1D70B8]' : 'text-[#16A34A]';
+          const members = teamMembersData.filter((m) => m.category === cat.id);
 
           return (
             <motion.section
@@ -66,20 +67,33 @@ export const TeamPage: React.FC = () => {
                     {cat.description}
                   </p>
                 </div>
-                <span className="text-xs font-mono text-slate-400 self-start sm:self-auto">
-                  [Official Roster Pending]
-                </span>
+                <div className="flex items-center gap-2 self-start sm:self-auto">
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 text-slate-600 text-xs font-mono font-medium">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#16A34A]" />
+                    {members.length} {members.length === 1 ? 'Member' : 'Members'}
+                  </span>
+                </div>
               </div>
 
-              {/* Grid of Team Member Cards (Structured Placeholders) */}
+              {/* Grid of Team Member Cards */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-                {Array.from({ length: cat.placeholderCount }).map((_, slotIdx) => (
-                  <TeamMemberCard
-                    key={slotIdx}
-                    categoryName={cat.id}
-                    index={slotIdx + 1}
-                  />
-                ))}
+                {members.length > 0 ? (
+                  members.map((member) => (
+                    <TeamMemberCard
+                      key={member.id}
+                      member={member}
+                      categoryName={cat.id}
+                    />
+                  ))
+                ) : (
+                  Array.from({ length: cat.placeholderCount }).map((_, slotIdx) => (
+                    <TeamMemberCard
+                      key={slotIdx}
+                      categoryName={cat.id}
+                      index={slotIdx + 1}
+                    />
+                  ))
+                )}
               </div>
             </motion.section>
           );
