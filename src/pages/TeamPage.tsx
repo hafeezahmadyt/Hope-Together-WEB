@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowRight, Shield, Users, HeartHandshake } from 'lucide-react';
+import { ArrowRight, Shield, Users } from 'lucide-react';
 import { SEO } from '../components/SEO';
 import { PageHero } from '../components/PageHero';
 import { TeamMemberCard } from '../components/TeamMemberCard';
@@ -29,18 +29,17 @@ export const TeamPage: React.FC = () => {
         <div className="max-w-3xl mx-auto px-6 text-center">
           <p className="text-base sm:text-lg text-slate-600 font-light leading-relaxed">
             Our collective strength lies in the integrity, empathy, and localized insight of our
-            leadership, field directors, and community volunteers across Khyber Pakhtunkhwa.
+            executive leadership and dedicated core team across Khyber Pakhtunkhwa.
           </p>
         </div>
       </section>
 
-      {/* Sections: Leadership, Team, Volunteers */}
+      {/* Sections: Executive Body & Core Team */}
       <div className="py-20 sm:py-28 bg-white/60 space-y-24 sm:space-y-32">
         {teamCategories.map((cat, idx) => {
-          const isLeadership = cat.id === 'Leadership';
-          const isTeam = cat.id === 'Team';
-          const Icon = isLeadership ? Shield : isTeam ? Users : HeartHandshake;
-          const accentColor = isLeadership ? 'text-[#1D70B8]' : isTeam ? 'text-[#16A34A]' : 'text-slate-700';
+          const isExecutive = cat.id === 'Executive Body' || cat.id === 'Leadership';
+          const Icon = isExecutive ? Shield : Users;
+          const accentColor = isExecutive ? 'text-[#1D70B8]' : 'text-[#16A34A]';
 
           return (
             <motion.section

@@ -40,7 +40,7 @@ export const AdminTeamPage: React.FC = () => {
     name: '',
     position: '',
     bio: '',
-    category: 'Leadership' as 'Leadership' | 'Team' | 'Volunteers',
+    category: 'Executive Body' as 'Executive Body' | 'Core Team' | string,
     photoUrl: '',
     email: '',
     linkedinUrl: '',
@@ -78,7 +78,7 @@ export const AdminTeamPage: React.FC = () => {
       name: '',
       position: '',
       bio: '',
-      category: 'Leadership',
+      category: 'Executive Body',
       photoUrl: '',
       email: '',
       linkedinUrl: '',
@@ -208,9 +208,8 @@ export const AdminTeamPage: React.FC = () => {
         placeholder="Search by name, position, or email..."
         filterOptions={[
           { label: 'All Departments', value: 'All' },
-          { label: 'Leadership', value: 'Leadership' },
-          { label: 'Core Team', value: 'Team' },
-          { label: 'Volunteers', value: 'Volunteers' },
+          { label: 'Executive Body', value: 'Executive Body' },
+          { label: 'Core Team', value: 'Core Team' },
         ]}
         selectedFilter={categoryFilter}
         onFilterChange={setCategoryFilter}
@@ -401,14 +400,13 @@ export const AdminTeamPage: React.FC = () => {
                     onChange={(e) =>
                       setFormData({
                         ...formData,
-                        category: e.target.value as 'Leadership' | 'Team' | 'Volunteers',
+                        category: e.target.value as 'Executive Body' | 'Core Team',
                       })
                     }
                     className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50/40 text-sm focus:outline-none focus:ring-2 focus:ring-[#1D70B8]"
                   >
-                    <option value="Leadership">Leadership & Governance</option>
-                    <option value="Team">Core Team & Field Staff</option>
-                    <option value="Volunteers">Community Volunteers</option>
+                    <option value="Executive Body">Executive Body</option>
+                    <option value="Core Team">Core Team</option>
                   </select>
                 </div>
 

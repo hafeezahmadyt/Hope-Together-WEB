@@ -34,6 +34,8 @@ export interface AdminUser {
   role: 'super_admin' | 'editor';
 }
 
+export type AdminTeamCategory = 'Executive Body' | 'Core Team';
+
 export interface AdminTeamMember {
   id: string;
   name: string;
@@ -45,7 +47,7 @@ export interface AdminTeamMember {
   facebookUrl?: string;
   displayOrder: number;
   isActive: boolean;
-  category: 'Leadership' | 'Team' | 'Volunteers';
+  category: AdminTeamCategory | 'Leadership' | 'Team' | 'Volunteers' | string;
 }
 
 export interface AdminPartner {

@@ -19,21 +19,15 @@ export const teamMembersData: TeamMember[] = [
 
 export const teamCategories = [
   {
-    id: 'Leadership',
-    title: 'Leadership & Governance',
-    description: 'Executive committee and supervisory board providing strategic stewardship.',
-    placeholderCount: 3,
+    id: 'Executive Body',
+    title: 'Executive Body',
+    description: 'Executive committee and governing leadership providing strategic stewardship and organizational direction.',
+    placeholderCount: 4,
   },
   {
-    id: 'Team',
-    title: 'Core Team & Field Coordinators',
-    description: 'Dedicated professionals spearheading local initiatives and community relations.',
-    placeholderCount: 3,
-  },
-  {
-    id: 'Volunteers',
-    title: 'Community Volunteers & Advocates',
-    description: 'Passionate grassroots volunteers driving frontline change across Khyber Pakhtunkhwa.',
+    id: 'Core Team',
+    title: 'Core Team',
+    description: 'Dedicated professionals spearheading local initiatives, program operations, and community engagement.',
     placeholderCount: 4,
   },
 ];

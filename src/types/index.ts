@@ -17,11 +17,13 @@ export interface Partner {
   websiteUrl?: string;
 }
 
+export type TeamCategory = 'Executive Body' | 'Core Team';
+
 export interface TeamMember {
   id: string;
   name: string;
   position: string;
-  category: 'Leadership' | 'Team' | 'Volunteers';
+  category: TeamCategory | 'Leadership' | 'Team' | 'Volunteers' | string;
   image?: string;
   bio?: string;
   socialLinks?: {
