@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import logoImg from '../assets/logo.png';
 import { Mail, MapPin } from 'lucide-react';
+import { socialLinks } from '../data/socialLinks';
 
 export const Footer: React.FC = () => {
   const currentYear = new Date().getFullYear();
@@ -82,15 +83,28 @@ export const Footer: React.FC = () => {
               </a>
             </div>
 
-            {/* Social media placeholder container */}
+            {/* Social media channels */}
             <div className="pt-3 border-t border-slate-100">
-              <span className="text-[11px] font-medium text-slate-400 block mb-2">
+              <span className="text-[11px] font-medium text-slate-400 block mb-2.5">
                 Social Media Channels
               </span>
-              <div className="flex items-center gap-3 text-slate-400 text-xs">
-                <span className="px-2.5 py-1 rounded bg-slate-100 text-slate-500 text-[11px] font-mono">
-                  [Social Links to be connected]
-                </span>
+              <div className="flex items-center gap-2">
+                {socialLinks.map((social) => {
+                  const Icon = social.icon;
+                  return (
+                    <a
+                      key={social.id}
+                      href={social.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={`w-9 h-9 rounded-xl flex items-center justify-center border border-slate-200/80 bg-slate-50 text-slate-600 transition-all duration-200 hover:shadow-xs active:scale-95 ${social.hoverClass}`}
+                      aria-label={social.ariaLabel}
+                      title={`${social.name} (${social.handle})`}
+                    >
+                      <Icon className="w-4 h-4" />
+                    </a>
+                  );
+                })}
               </div>
             </div>
           </div>

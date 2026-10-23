@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { NavLink, Link, useLocation } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import logoImg from '../assets/logo.png';
+import { socialLinks } from '../data/socialLinks';
 
 interface NavItem {
   label: string;
@@ -144,7 +145,7 @@ export const Navbar: React.FC = () => {
                 <span>{item.label}</span>
               </NavLink>
             ))}
-            <div className="pt-3 border-t border-slate-100 mt-2">
+            <div className="pt-3 border-t border-slate-100 mt-2 flex flex-col gap-3">
               <Link
                 to="/contact#get-involved"
                 onClick={() => setIsMobileMenuOpen(false)}
@@ -152,6 +153,24 @@ export const Navbar: React.FC = () => {
               >
                 Get Involved
               </Link>
+              <div className="flex items-center justify-center gap-3 pt-1">
+                {socialLinks.map((social) => {
+                  const Icon = social.icon;
+                  return (
+                    <a
+                      key={social.id}
+                      href={social.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={`w-9 h-9 rounded-xl flex items-center justify-center border border-slate-200/80 bg-slate-50 text-slate-600 transition-all ${social.hoverClass}`}
+                      aria-label={social.ariaLabel}
+                      title={social.name}
+                    >
+                      <Icon className="w-4 h-4" />
+                    </a>
+                  );
+                })}
+              </div>
             </div>
           </nav>
         </div>

@@ -7,8 +7,8 @@ export const initialMockSettings: AdminSiteSettings = {
   contactEmail: 'info@hopetogether.org.pk',
   phone: '+92 (0) XXX XXXXXXX',
   address: 'Regional Office: Khyber Pakhtunkhwa, Pakistan',
-  facebookUrl: 'https://facebook.com/hopetogetherorg',
-  instagramUrl: 'https://instagram.com/hopetogetherorg',
-  linkedinUrl: 'https://linkedin.com/company/hopetogetherorg',
-  youtubeUrl: 'https://youtube.com/@hopetogetherorg',
+  facebookUrl: 'https://www.facebook.com/HopeTogetherKP/',
+  instagramUrl: 'https://www.instagram.com/hopetogetherorganization/',
+  linkedinUrl: 'https://www.linkedin.com/company/hope-together-organization/',
+  youtubeUrl: '',
 };

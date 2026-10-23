@@ -16,6 +16,7 @@ import {
 import { SEO } from '../components/SEO';
 import { PageHero } from '../components/PageHero';
 import { messageService } from '../services/messageService';
+import { socialLinks } from '../data/socialLinks';
 
 interface FormState {
   fullName: string;
@@ -203,18 +204,37 @@ export const ContactPage: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* Social Media Placeholder */}
+                  {/* Official Social Channels */}
                   <div className="flex items-start gap-4 p-4 rounded-2xl bg-white/80 border border-slate-200/60 shadow-xs">
-                    <div className="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <div className="w-10 h-10 rounded-xl bg-blue-50 text-[#1D70B8] flex items-center justify-center flex-shrink-0 mt-0.5">
                       <Share2 className="w-5 h-5" />
                     </div>
-                    <div>
-                      <span className="text-xs font-semibold text-slate-800 uppercase tracking-wide block">
+                    <div className="flex-1 min-w-0">
+                      <span className="text-xs font-semibold text-slate-800 uppercase tracking-wide block mb-1">
                         Social Channels
                       </span>
-                      <span className="text-xs text-slate-400 font-mono block mt-0.5">
-                        [Verified social links to be connected]
-                      </span>
+                      <p className="text-xs text-slate-500 font-light mb-2.5">
+                        Follow our field work, community stories, and official announcements:
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        {socialLinks.map((social) => {
+                          const Icon = social.icon;
+                          return (
+                            <a
+                              key={social.id}
+                              href={social.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 bg-slate-50 text-xs font-medium text-slate-700 transition-all duration-200 hover:shadow-xs active:scale-95 ${social.hoverClass}`}
+                              aria-label={social.ariaLabel}
+                              title={`${social.name}: ${social.handle}`}
+                            >
+                              <Icon className="w-3.5 h-3.5 flex-shrink-0" />
+                              <span>{social.name}</span>
+                            </a>
+                          );
+                        })}
+                      </div>
                     </div>
                   </div>
                 </div>
