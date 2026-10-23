@@ -32,6 +32,7 @@ export const AdminTeamPage: React.FC = () => {
   const [editingMember, setEditingMember] = useState<AdminTeamMember | null>(null);
   const [deletingMember, setDeletingMember] = useState<AdminTeamMember | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [isReadingPhoto, setIsReadingPhoto] = useState(false);
   const [toast, setToast] = useState<ToastMessage | null>(null);
 
   // Form State
@@ -155,12 +156,22 @@ export const AdminTeamPage: React.FC = () => {
     }
   };
 
-  // Mock Photo File Upload simulation
+  // Photo File Upload handler converting to persistent Data URL
   const handlePhotoFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const fakeLocalUrl = URL.createObjectURL(file);
-      setFormData((prev) => ({ ...prev, photoUrl: fakeLocalUrl }));
+      setIsReadingPhoto(true);
+      const reader = new FileReader();
+      reader.onload = () => {
+        if (typeof reader.result === 'string') {
+          setFormData((prev) => ({ ...prev, photoUrl: reader.result as string }));
+        }
+        setIsReadingPhoto(false);
+      };
+      reader.onerror = () => {
+        setIsReadingPhoto(false);
+      };
+      reader.readAsDataURL(file);
     }
   };
 
@@ -395,8 +406,8 @@ export const AdminTeamPage: React.FC = () => {
                     }
                     className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50/40 text-sm focus:outline-none focus:ring-2 focus:ring-[#1D70B8]"
                   >
-                    <option value="Leadership">Leadership &amp; Governance</option>
-                    <option value="Team">Core Team &amp; Field Staff</option>
+                    <option value="Leadership">Leadership & Governance</option>
+                    <option value="Team">Core Team & Field Staff</option>
                     <option value="Volunteers">Community Volunteers</option>
                   </select>
                 </div>
@@ -528,11 +539,19 @@ export const AdminTeamPage: React.FC = () => {
                 </button>
                 <button
                   type="submit"
-                  disabled={isSaving}
+                  disabled={isSaving || isReadingPhoto}
                   className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-slate-900 text-white text-xs font-semibold hover:bg-slate-800 transition-all shadow-xs disabled:opacity-60 cursor-pointer"
                 >
                   <Check className="w-4 h-4" />
-                  <span>{isSaving ? 'Saving...' : editingMember ? 'Update Member' : 'Save Member'}</span>
+                  <span>
+                    {isSaving
+                      ? 'Saving...'
+                      : isReadingPhoto
+                      ? 'Reading photo...'
+                      : editingMember
+                      ? 'Update Member'
+                      : 'Save Member'}
+                  </span>
                 </button>
               </div>
             </form>

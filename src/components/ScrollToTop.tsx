@@ -6,10 +6,14 @@ export const ScrollToTop = () => {
 
   useEffect(() => {
     if (hash) {
-      const element = document.querySelector(hash);
-      if (element) {
-        element.scrollIntoView({ behavior: 'smooth' });
-        return;
+      try {
+        const element = document.querySelector(hash);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth' });
+          return;
+        }
+      } catch {
+        // Ignore invalid CSS selector in hash
       }
     }
     window.scrollTo({ top: 0, left: 0, behavior: 'instant' as ScrollBehavior });

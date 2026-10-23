@@ -33,6 +33,7 @@ export const AdminPartnersPage: React.FC = () => {
   const [editingPartner, setEditingPartner] = useState<AdminPartner | null>(null);
   const [deletingPartner, setDeletingPartner] = useState<AdminPartner | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [isReadingLogo, setIsReadingLogo] = useState(false);
   const [toast, setToast] = useState<ToastMessage | null>(null);
 
   // Form State
@@ -151,8 +152,18 @@ export const AdminPartnersPage: React.FC = () => {
   const handleLogoFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const localUrl = URL.createObjectURL(file);
-      setFormData((prev) => ({ ...prev, logoUrl: localUrl }));
+      setIsReadingLogo(true);
+      const reader = new FileReader();
+      reader.onload = () => {
+        if (typeof reader.result === 'string') {
+          setFormData((prev) => ({ ...prev, logoUrl: reader.result as string }));
+        }
+        setIsReadingLogo(false);
+      };
+      reader.onerror = () => {
+        setIsReadingLogo(false);
+      };
+      reader.readAsDataURL(file);
     }
   };
 
@@ -491,11 +502,19 @@ export const AdminPartnersPage: React.FC = () => {
                 </button>
                 <button
                   type="submit"
-                  disabled={isSaving}
-                  className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-slate-900 text-white text-xs font-semibold hover:bg-slate-800 transition-all shadow-xs cursor-pointer"
+                  disabled={isSaving || isReadingLogo}
+                  className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-slate-900 text-white text-xs font-semibold hover:bg-slate-800 transition-all shadow-xs cursor-pointer disabled:opacity-60"
                 >
                   <Check className="w-4 h-4" />
-                  <span>{isSaving ? 'Saving...' : editingPartner ? 'Update Partner' : 'Save Partner'}</span>
+                  <span>
+                    {isSaving
+                      ? 'Saving...'
+                      : isReadingLogo
+                      ? 'Reading logo...'
+                      : editingPartner
+                      ? 'Update Partner'
+                      : 'Save Partner'}
+                  </span>
                 </button>
               </div>
             </form>

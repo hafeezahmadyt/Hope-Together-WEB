@@ -114,7 +114,7 @@ export const PartnersPage: React.FC = () => {
                         Partner Slot {slotIdx + 1}
                       </span>
                       <span className="text-[10px] text-slate-400 mt-1 font-mono">
-                        [Logo &amp; Credentials Pending]
+                        [Logo & Credentials Pending]
                       </span>
                     </div>
                   ))}

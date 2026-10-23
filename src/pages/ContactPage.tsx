@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { SEO } from '../components/SEO';
 import { PageHero } from '../components/PageHero';
+import { messageService } from '../services/messageService';
 
 interface FormState {
   fullName: string;
@@ -42,6 +43,7 @@ export const ContactPage: React.FC = () => {
   const [errors, setErrors] = useState<FormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const validate = (): boolean => {
     const errs: FormErrors = {};
@@ -60,17 +62,29 @@ export const ContactPage: React.FC = () => {
     return Object.keys(errs).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validate()) return;
 
     setIsSubmitting(true);
+    setSubmitError(null);
 
-    // Mock/Frontend submission handler (simulated processing)
-    setTimeout(() => {
-      setIsSubmitting(false);
+    try {
+      await messageService.createMessage({
+        name: formData.fullName.trim(),
+        email: formData.email.trim(),
+        phone: formData.phone.trim() || undefined,
+        subject: formData.subject.trim() || 'General Inquiry',
+        message: formData.message.trim(),
+        receivedDate: new Date().toISOString(),
+        status: 'Unread',
+      });
       setIsSubmitted(true);
-    }, 600);
+    } catch {
+      setSubmitError('Unable to send your message at this moment. Please try again or reach out to us at info@hopetogether.org.pk.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleSelectPathway = (subjectTitle: string) => {
@@ -260,6 +274,12 @@ export const ContactPage: React.FC = () => {
                   </motion.div>
                 ) : (
                   <form onSubmit={handleSubmit} noValidate className="space-y-6">
+                    {submitError && (
+                      <div role="alert" className="p-4 rounded-2xl bg-red-50 border border-red-200 text-red-700 text-xs sm:text-sm flex items-start gap-3">
+                        <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5 text-red-500" />
+                        <span>{submitError}</span>
+                      </div>
+                    )}
                     {/* Full Name */}
                     <div>
                       <label htmlFor="fullName" className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">
@@ -382,7 +402,7 @@ export const ContactPage: React.FC = () => {
         <div className="max-w-6xl mx-auto px-6 sm:px-8">
           <div className="max-w-2xl mb-14">
             <span className="text-xs uppercase tracking-[0.25em] text-[#16A34A] font-semibold block mb-3">
-              Action &amp; Engagement
+              Action & Engagement
             </span>
             <h2 className="text-3xl sm:text-4xl font-light text-slate-900 tracking-tight mb-3">
               Get Involved

@@ -103,7 +103,7 @@ export const TeamMemberCard: React.FC<TeamMemberCardProps> = ({
         </h3>
 
         <p className="text-xs text-slate-500 font-mono bg-slate-50/80 p-3 rounded-xl border border-dashed border-slate-200 leading-relaxed mb-4">
-          [Position title, credentials &amp; brief biography will be placed here.]
+          [Position title, credentials & brief biography will be placed here.]
         </p>
       </div>
 

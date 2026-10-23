@@ -6,11 +6,14 @@ const STORAGE_KEY = 'hope_together_cms_messages';
 function getStoredMessages(): AdminContactMessage[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) return JSON.parse(raw);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) return parsed;
+    }
   } catch {
     // Fallback
   }
-  return initialMockMessages;
+  return [...initialMockMessages];
 }
 
 function saveStoredMessages(messages: AdminContactMessage[]): void {
@@ -22,6 +25,18 @@ function saveStoredMessages(messages: AdminContactMessage[]): void {
 }
 
 export const messageService = {
+  async createMessage(data: Omit<AdminContactMessage, 'id'>): Promise<AdminContactMessage> {
+    await new Promise((r) => setTimeout(r, 150));
+    const messages = getStoredMessages();
+    const newMessage: AdminContactMessage = {
+      ...data,
+      id: `msg-${Date.now()}`,
+    };
+    messages.unshift(newMessage);
+    saveStoredMessages(messages);
+    return newMessage;
+  },
+
   async getMessages(): Promise<AdminContactMessage[]> {
     await new Promise((r) => setTimeout(r, 150));
     return getStoredMessages();
