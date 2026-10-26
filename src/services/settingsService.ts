@@ -6,7 +6,29 @@ const STORAGE_KEY = 'hope_together_cms_settings';
 function getStoredSettings(): AdminSiteSettings {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) return JSON.parse(raw);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      let updated = false;
+      if (parsed.contactEmail === 'info@hopetogether.org.pk' || !parsed.contactEmail) {
+        parsed.contactEmail = initialMockSettings.contactEmail;
+        updated = true;
+      }
+      if (
+        parsed.address === 'Regional Office: Khyber Pakhtunkhwa, Pakistan' ||
+        !parsed.address
+      ) {
+        parsed.address = initialMockSettings.address;
+        updated = true;
+      }
+      if (updated) {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
+        } catch {
+          // If storage quota or permission fails, still return parsed data
+        }
+      }
+      return parsed;
+    }
   } catch {
     // Fallback
   }

@@ -115,7 +115,9 @@ export const ContactPage: React.FC = () => {
       });
       setIsSubmitted(true);
     } catch {
-      setSubmitError('Unable to send your message at this moment. Please try again or reach out to us at info@hopetogether.org.pk.');
+      setSubmitError(
+        `Unable to send your message at this moment. Please try again or reach out to us directly at ${settings.contactEmail || 'hopetogether.org@gmail.com'}.`
+      );
     } finally {
       setIsSubmitting(false);
     }

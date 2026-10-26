@@ -1,9 +1,41 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { ArrowRight, Mail } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import logoWhite from '../assets/logo-white.png';
+import { settingsService } from '../services/settingsService';
+import { initialMockSettings } from '../data/mock/mockSettings';
+import { AdminSiteSettings } from '../types/admin';
 
 export const FinalCTA: React.FC = () => {
+  const [settings, setSettings] = useState<AdminSiteSettings>(initialMockSettings);
+
+  useEffect(() => {
+    let isMounted = true;
+    const loadSettings = async () => {
+      try {
+        const data = await settingsService.getSettings();
+        if (isMounted) setSettings(data);
+      } catch {
+        // Fallback
+      }
+    };
+
+    loadSettings();
+
+    const handleUpdate = () => {
+      loadSettings();
+    };
+
+    window.addEventListener('hope_together_settings_changed', handleUpdate);
+    window.addEventListener('storage', handleUpdate);
+
+    return () => {
+      isMounted = false;
+      window.removeEventListener('hope_together_settings_changed', handleUpdate);
+      window.removeEventListener('storage', handleUpdate);
+    };
+  }, []);
   return (
     <section id="contact" className="py-24 sm:py-32 bg-slate-900 text-white relative overflow-hidden">
       {/* Atmospheric subtle gradients & lighting */}
@@ -66,15 +98,15 @@ export const FinalCTA: React.FC = () => {
           transition={{ duration: 0.6, delay: 0.2 }}
           className="flex flex-wrap items-center justify-center gap-4"
         >
-          <a
-            href="mailto:contact@hopetogether.org.pk?subject=Get%20Involved%20-%20Hope%20Together%20Organization"
+          <Link
+            to="/contact"
             className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full bg-white text-slate-900 text-sm font-semibold hover:bg-slate-100 transition-all duration-200 shadow-lg hover:-translate-y-0.5"
           >
             <span>Get Involved</span>
             <ArrowRight className="w-4 h-4" />
-          </a>
+          </Link>
           <a
-            href="mailto:info@hopetogether.org.pk?subject=Inquiry%20-%20Hope%20Together%20Organization"
+            href={`mailto:${settings.contactEmail}?subject=Inquiry%20-%20Hope%20Together%20Organization`}
             className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white text-sm font-medium hover:bg-white/20 transition-all duration-200 hover:-translate-y-0.5"
           >
             <Mail className="w-4 h-4 text-slate-300" />
@@ -84,7 +116,7 @@ export const FinalCTA: React.FC = () => {
 
         {/* Geographical and Institutional Note */}
         <div className="mt-16 pt-8 border-t border-slate-800/80 text-xs text-slate-400 font-light flex flex-wrap items-center justify-center gap-4 sm:gap-6">
-          <span>Khyber Pakhtunkhwa, Pakistan</span>
+          <span>{settings.address}</span>
           <span className="hidden sm:inline">•</span>
           <span>Registered Humanitarian Organization</span>
         </div>
