@@ -1,13 +1,48 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowRight, Shield, Users } from 'lucide-react';
 import { SEO } from '../components/SEO';
 import { PageHero } from '../components/PageHero';
 import { TeamMemberCard } from '../components/TeamMemberCard';
-import { teamCategories, teamMembersData } from '../data/team';
+import { teamCategories } from '../data/team';
+import { teamService } from '../services/teamService';
+import { AdminTeamMember } from '../types/admin';
 
 export const TeamPage: React.FC = () => {
+  const [members, setMembers] = useState<AdminTeamMember[]>([]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadMembers = async () => {
+      try {
+        const data = await teamService.getTeamMembers();
+        if (isMounted) {
+          setMembers(data);
+        }
+      } catch {
+        // Fallback gracefully
+      }
+    };
+
+    loadMembers();
+
+    // Listen to real-time updates from Admin Portal (same tab or other tabs)
+    const handleUpdate = () => {
+      loadMembers();
+    };
+
+    window.addEventListener('hope_together_team_changed', handleUpdate);
+    window.addEventListener('storage', handleUpdate);
+
+    return () => {
+      isMounted = false;
+      window.removeEventListener('hope_together_team_changed', handleUpdate);
+      window.removeEventListener('storage', handleUpdate);
+    };
+  }, []);
+
   return (
     <>
       <SEO
@@ -40,7 +75,9 @@ export const TeamPage: React.FC = () => {
           const isExecutive = cat.id === 'Executive Body' || cat.id === 'Leadership';
           const Icon = isExecutive ? Shield : Users;
           const accentColor = isExecutive ? 'text-[#1D70B8]' : 'text-[#16A34A]';
-          const members = teamMembersData.filter((m) => m.category === cat.id);
+          const categoryMembers = members
+            .filter((m) => m.category === cat.id && m.isActive !== false)
+            .sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
 
           return (
             <motion.section
@@ -68,17 +105,23 @@ export const TeamPage: React.FC = () => {
                   </p>
                 </div>
                 <div className="flex items-center gap-2 self-start sm:self-auto">
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 text-slate-600 text-xs font-mono font-medium">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#16A34A]" />
-                    {members.length} {members.length === 1 ? 'Member' : 'Members'}
-                  </span>
+                  {categoryMembers.length > 0 ? (
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 text-slate-600 text-xs font-mono font-medium">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#16A34A]" />
+                      {categoryMembers.length} {categoryMembers.length === 1 ? 'Member' : 'Members'}
+                    </span>
+                  ) : (
+                    <span className="text-xs font-mono text-slate-400">
+                      [Official Roster Pending]
+                    </span>
+                  )}
                 </div>
               </div>
 
               {/* Grid of Team Member Cards */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-                {members.length > 0 ? (
-                  members.map((member) => (
+                {categoryMembers.length > 0 ? (
+                  categoryMembers.map((member) => (
                     <TeamMemberCard
                       key={member.id}
                       member={member}

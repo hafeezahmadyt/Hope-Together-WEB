@@ -1,73 +1,7 @@
 import { AdminTeamMember } from '../../types/admin';
 
-export const initialMockTeamMembers: AdminTeamMember[] = [
-  {
-    id: 'team-1',
-    name: 'Hafeez Ahmad',
-    position: 'Vice President',
-    bio: 'Executive leadership and strategic stewardship for Hope Together Organization, spearheading institutional partnerships, collaborative MoUs, and youth empowerment initiatives across Khyber Pakhtunkhwa.',
-    email: 'info@hopetogether.org.pk',
-    instagramUrl: 'https://www.instagram.com/hopetogetherorganization/',
-    facebookUrl: 'https://www.facebook.com/HopeTogetherKP/',
-    displayOrder: 1,
-    isActive: true,
-    category: 'Executive Body',
-  },
-  {
-    id: 'team-2',
-    name: 'Maheen Kamran',
-    position: 'General Secretary',
-    bio: 'A gold medalist in Peace and Conflict Studies, dedicated to advancing peace, social cohesion, and human rights through conflict resolution, diplomacy, and community stewardship.',
-    email: 'secretary@hopetogether.org.pk',
-    photoUrl: '/assets/team/maheen-kamran.jpg',
-    instagramUrl: 'https://www.instagram.com/p/DShz8wliAes/',
-    displayOrder: 2,
-    isActive: true,
-    category: 'Executive Body',
-  },
-  {
-    id: 'team-3',
-    name: 'Mehnaz Javed',
-    position: 'Executive Director',
-    bio: 'Provides strategic guidance on peacebuilding, public health awareness, youth leadership, and non-profit collaborations across regional community networks.',
-    email: 'director@hopetogether.org.pk',
-    instagramUrl: 'https://www.instagram.com/hopetogetherorganization/',
-    displayOrder: 3,
-    isActive: true,
-    category: 'Executive Body',
-  },
-  {
-    id: 'team-4',
-    name: 'Jibran Shah',
-    position: 'President / Regional Affairs',
-    bio: 'Leads community welfare projects and regional stakeholder outreach, coordinating vital development programs including clean water and youth infrastructure across Charsadda and KP.',
-    email: 'president@hopetogether.org.pk',
-    facebookUrl: 'https://www.facebook.com/HopeTogetherKP/',
-    displayOrder: 4,
-    isActive: true,
-    category: 'Executive Body',
-  },
-  {
-    id: 'team-5',
-    name: 'Afeefa Akram',
-    position: 'Director Women Forum',
-    bio: 'A passionate law student deeply committed to women’s education, climate change advocacy, and social welfare. Experienced with UNICEF initiatives addressing child marriage and promoting girls’ education.',
-    email: 'womenforum@hopetogether.org.pk',
-    photoUrl: '/assets/team/afeefa-akram.jpg',
-    instagramUrl: 'https://www.instagram.com/p/DTlGbvpDNpY/',
-    displayOrder: 5,
-    isActive: true,
-    category: 'Core Team',
-  },
-  {
-    id: 'team-6',
-    name: 'Umar Farooq',
-    position: 'Director Programs',
-    bio: 'Directs grassroots program execution, educational workshops, youth capacity-building camps, and community outreach operations.',
-    email: 'programs@hopetogether.org.pk',
-    instagramUrl: 'https://www.instagram.com/hopetogetherorganization/',
-    displayOrder: 6,
-    isActive: true,
-    category: 'Core Team',
-  },
-];
+/**
+ * Initial mock team members dataset for the Admin CMS.
+ * Set to an empty array so administrators can populate official records from scratch through the Admin Portal.
+ */
+export const initialMockTeamMembers: AdminTeamMember[] = [];

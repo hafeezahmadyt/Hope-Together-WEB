@@ -16,6 +16,9 @@ function getStoredMembers(): AdminTeamMember[] {
 function saveStoredMembers(members: AdminTeamMember[]): void {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(members));
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new Event('hope_together_team_changed'));
+    }
   } catch {
     // Ignore
   }
@@ -23,18 +26,18 @@ function saveStoredMembers(members: AdminTeamMember[]): void {
 
 export const teamService = {
   async getTeamMembers(): Promise<AdminTeamMember[]> {
-    await new Promise((r) => setTimeout(r, 150));
+    await new Promise((r) => setTimeout(r, 50));
     return getStoredMembers();
   },
 
   async getTeamMember(id: string): Promise<AdminTeamMember | null> {
-    await new Promise((r) => setTimeout(r, 100));
+    await new Promise((r) => setTimeout(r, 50));
     const members = getStoredMembers();
     return members.find((m) => m.id === id) || null;
   },
 
   async createTeamMember(data: Omit<AdminTeamMember, 'id'>): Promise<AdminTeamMember> {
-    await new Promise((r) => setTimeout(r, 200));
+    await new Promise((r) => setTimeout(r, 100));
     const members = getStoredMembers();
     const newMember: AdminTeamMember = {
       ...data,
@@ -46,7 +49,7 @@ export const teamService = {
   },
 
   async updateTeamMember(id: string, data: Partial<AdminTeamMember>): Promise<AdminTeamMember> {
-    await new Promise((r) => setTimeout(r, 200));
+    await new Promise((r) => setTimeout(r, 100));
     const members = getStoredMembers();
     const index = members.findIndex((m) => m.id === id);
     if (index === -1) throw new Error('Team member not found');
@@ -57,7 +60,7 @@ export const teamService = {
   },
 
   async deleteTeamMember(id: string): Promise<void> {
-    await new Promise((r) => setTimeout(r, 200));
+    await new Promise((r) => setTimeout(r, 100));
     const members = getStoredMembers();
     const filtered = members.filter((m) => m.id !== id);
     saveStoredMembers(filtered);

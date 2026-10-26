@@ -1,9 +1,10 @@
 import React from 'react';
 import { User, Linkedin, Twitter, Mail, Instagram, Facebook } from 'lucide-react';
 import { TeamMember } from '../types';
+import { AdminTeamMember } from '../types/admin';
 
 interface TeamMemberCardProps {
-  member?: TeamMember;
+  member?: TeamMember | AdminTeamMember;
   placeholderRole?: string;
   categoryName?: string;
   index?: number;
@@ -16,14 +17,27 @@ export const TeamMemberCard: React.FC<TeamMemberCardProps> = ({
   index = 1,
 }) => {
   if (member) {
+    const adminMember = member as AdminTeamMember;
+    const photo = adminMember.photoUrl || (member as TeamMember).image;
+
+    // Build social links array
+    const socialList = (member as TeamMember).socialLinks && (member as TeamMember).socialLinks!.length > 0
+      ? (member as TeamMember).socialLinks!
+      : [
+          adminMember.linkedinUrl ? { platform: 'linkedin', url: adminMember.linkedinUrl } : null,
+          adminMember.instagramUrl ? { platform: 'instagram', url: adminMember.instagramUrl } : null,
+          adminMember.facebookUrl ? { platform: 'facebook', url: adminMember.facebookUrl } : null,
+          adminMember.email ? { platform: 'mail', url: `mailto:${adminMember.email}` } : null,
+        ].filter(Boolean) as { platform: string; url: string }[];
+
     return (
       <div className="p-6 rounded-3xl bg-white/80 border border-slate-200/70 hover:border-slate-300 transition-all duration-300 shadow-[0_2px_12px_rgba(0,0,0,0.02)] hover:shadow-md flex flex-col justify-between h-full group">
         <div>
           {/* Photograph Container */}
           <div className="aspect-[4/3] rounded-2xl overflow-hidden bg-slate-100 mb-5 relative flex items-center justify-center">
-            {member.image ? (
+            {photo ? (
               <img
-                src={member.image}
+                src={photo}
                 alt={member.name}
                 className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
               />
@@ -49,9 +63,9 @@ export const TeamMemberCard: React.FC<TeamMemberCardProps> = ({
           )}
         </div>
 
-        {member.socialLinks && member.socialLinks.length > 0 && (
+        {socialList.length > 0 && (
           <div className="pt-4 border-t border-slate-100 flex items-center gap-3 text-slate-400">
-            {member.socialLinks.map((link, i) => (
+            {socialList.map((link, i) => (
               <a
                 key={i}
                 href={link.url}
