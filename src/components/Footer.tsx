@@ -84,9 +84,9 @@ export const Footer: React.FC = () => {
               <img
                 src={logoImg}
                 alt="Hope Together Organization"
-                className="h-10 w-auto object-contain"
-                width="40"
-                height="40"
+                className="h-11 sm:h-12 w-auto object-contain transition-transform duration-300 hover:scale-105"
+                width="48"
+                height="48"
               />
               <div className="flex flex-col">
                 <span className="text-sm font-extrabold tracking-wider text-slate-900 uppercase">

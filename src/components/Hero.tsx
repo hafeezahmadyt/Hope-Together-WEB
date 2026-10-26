@@ -59,7 +59,7 @@ export const Hero: React.FC = () => {
             <img
               src={logoImg}
               alt="Hope Together Organization Emblem"
-              className="h-5 w-auto object-contain"
+              className="h-6 w-auto object-contain"
             />
             <span className="text-xs font-semibold tracking-wider text-slate-700 uppercase">
               Khyber Pakhtunkhwa, Pakistan

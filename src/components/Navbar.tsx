@@ -82,9 +82,9 @@ export const Navbar: React.FC = () => {
           <img
             src={logoImg}
             alt="Hope Together Organization Official Emblem"
-            className="h-8 sm:h-10 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
-            width="40"
-            height="40"
+            className="h-9 sm:h-11 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
+            width="44"
+            height="44"
           />
           <div className="flex flex-col text-left">
             <span className="text-xs sm:text-sm font-extrabold tracking-wider text-slate-900 uppercase leading-tight">

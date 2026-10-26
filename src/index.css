@@ -61,7 +61,43 @@
   animation: orbFloat2 16s ease-in-out infinite alternate;
 }
 
+/* Continuous Soft Marquee for Partner Logos */
+@keyframes marqueeScroll {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+.animate-marquee-smooth {
+  display: flex;
+  flex-shrink: 0;
+  animation: marqueeScroll 35s linear infinite;
+  will-change: transform;
+}
+
+.marquee-container:hover .animate-marquee-smooth,
+.marquee-container:focus-within .animate-marquee-smooth,
+.animate-marquee-smooth:hover,
+.animate-marquee-smooth:focus-within,
+.animate-marquee-smooth.is-paused,
+[data-marquee-paused="true"] .animate-marquee-smooth {
+  animation-play-state: paused;
+}
+
 @media (prefers-reduced-motion: reduce) {
+  .marquee-container {
+    overflow-x: auto !important;
+  }
+  .animate-marquee-smooth {
+    animation: none !important;
+    transform: none !important;
+  }
+  .marquee-container [aria-hidden="true"] {
+    display: none !important;
+  }
   *,
   ::before,
   ::after {
