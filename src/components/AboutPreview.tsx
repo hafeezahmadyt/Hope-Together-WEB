@@ -22,10 +22,10 @@ export const AboutPreview: React.FC = () => {
           About Hope Together Organization
         </h3>
         <p className="text-slate-600 text-sm sm:text-base font-light leading-relaxed mb-6">
-          Founded on the belief that enduring transformation begins at the grassroots level,
-          Hope Together Organization works hand-in-hand with families and local leadership to
-          strengthen communities across Khyber Pakhtunkhwa. Our forthcoming narrative documents
-          our origins, governance charter, and transparent approach to collective impact.
+          Hope Together Organization is dedicated to establishing a youth-led society where every
+          individual enjoys fundamental rights, equal opportunities, and protection from
+          discrimination. We are committed to the grassroots empowerment of youth, women, and children,
+          particularly across urban and marginalized communities.
         </p>
       </motion.div>
 

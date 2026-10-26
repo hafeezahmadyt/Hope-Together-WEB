@@ -1,10 +1,30 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowRight, Compass, Target, HeartHandshake, ShieldCheck } from 'lucide-react';
+import {
+  ArrowRight,
+  Compass,
+  Target,
+  HeartHandshake,
+  ShieldCheck,
+  Megaphone,
+  GraduationCap,
+  LifeBuoy,
+  Leaf,
+  Scale,
+} from 'lucide-react';
 import { SEO } from '../components/SEO';
 import { PageHero } from '../components/PageHero';
 import { organizationalValues } from '../data/values';
+import { methodologyItems } from '../data/methodology';
+
+const methodologyIcons = [
+  Megaphone,
+  GraduationCap,
+  LifeBuoy,
+  Leaf,
+  Scale,
+];
 
 export const AboutPage: React.FC = () => {
   return (
@@ -38,14 +58,14 @@ export const AboutPage: React.FC = () => {
 
             <div className="lg:col-span-8">
               <div className="p-8 sm:p-10 rounded-3xl bg-white/80 border border-slate-200/70 shadow-[0_2px_12px_rgba(0,0,0,0.02)]">
-                <p className="text-slate-600 text-base sm:text-lg font-light leading-relaxed mb-6">
+                <p className="text-slate-700 text-base sm:text-lg font-light leading-relaxed mb-4">
                   Hope Together Organization is an indigenous non-governmental organization registered and
                   operating in Khyber Pakhtunkhwa, Pakistan. We work closely alongside local communities
                   to foster sustainable development, social dignity, and grassroots empowerment.
                 </p>
-                <div className="p-6 rounded-2xl bg-[#F8FAFC] border border-dashed border-slate-300 text-slate-500 font-mono text-xs sm:text-sm">
-                  [Official organization introduction will be added here.]
-                </div>
+                <p className="text-slate-600 text-sm sm:text-base font-light leading-relaxed">
+                  Committed to the empowerment of youth, women, and children, particularly those from urban and marginalized communities, our organization executes community-led programs anchored in democratic citizenship, legal awareness, environmental resilience, and transparent stewardship.
+                </p>
               </div>
             </div>
           </div>
@@ -72,11 +92,11 @@ export const AboutPage: React.FC = () => {
                   Mandate
                 </span>
                 <h3 className="text-2xl sm:text-3xl font-light text-slate-900 tracking-tight mb-4">
-                  Our Mission
+                  Mission Statement
                 </h3>
-                <div className="p-5 rounded-2xl bg-blue-50/50 border border-dashed border-blue-200 text-slate-600 font-mono text-sm leading-relaxed">
-                  [Official mission statement]
-                </div>
+                <p className="text-slate-700 text-base sm:text-lg font-light leading-relaxed">
+                  Hope Together Organization is committed to the empowerment of youth, women, and children, particularly those from urban and marginalized communities.
+                </p>
               </div>
             </motion.div>
 
@@ -96,11 +116,11 @@ export const AboutPage: React.FC = () => {
                   Horizon
                 </span>
                 <h3 className="text-2xl sm:text-3xl font-light text-slate-900 tracking-tight mb-4">
-                  Our Vision
+                  Vision Statement
                 </h3>
-                <div className="p-5 rounded-2xl bg-emerald-50/50 border border-dashed border-emerald-200 text-slate-600 font-mono text-sm leading-relaxed">
-                  [Official vision statement]
-                </div>
+                <p className="text-slate-700 text-base sm:text-lg font-light leading-relaxed">
+                  The vision of Hope Together Organization is to establish a youth led society in which every individual regardless of gender, religion, caste, or background enjoys fundamental rights, equal opportunities, and protection from discrimination.
+                </p>
               </div>
             </motion.div>
           </div>
@@ -117,7 +137,7 @@ export const AboutPage: React.FC = () => {
             <h2 className="text-3xl sm:text-4xl font-light text-slate-900 tracking-tight mb-3">
               Our Values
             </h2>
-            <p className="text-slate-500 text-sm sm:text-base font-light">
+            <p className="text-slate-600 text-sm sm:text-base font-light leading-relaxed">
               The ethical compass directing every initiative and engagement across our communities.
             </p>
           </div>
@@ -136,12 +156,12 @@ export const AboutPage: React.FC = () => {
                   <span className="text-xs font-mono font-semibold text-slate-400 uppercase tracking-wider">
                     {val.number} / Value
                   </span>
-                  <HeartHandshake className="w-4 h-4 text-slate-400" />
+                  <HeartHandshake className="w-4 h-4 text-[#1D70B8]" />
                 </div>
-                <h3 className="text-xl font-medium text-slate-900 mb-2">
+                <h3 className="text-xl font-medium text-slate-900 mb-3">
                   {val.title}
                 </h3>
-                <p className="text-slate-500 font-mono text-xs sm:text-sm bg-slate-50 p-3 rounded-xl border border-dashed border-slate-200">
+                <p className="text-slate-600 text-sm sm:text-base font-light leading-relaxed">
                   {val.description}
                 </p>
               </motion.div>
@@ -150,37 +170,71 @@ export const AboutPage: React.FC = () => {
         </div>
       </section>
 
-      {/* 6. Our Approach */}
+      {/* 6. Our Approach / Methodology */}
       <section className="py-20 sm:py-28 bg-white/60 border-t border-slate-200/60">
         <div className="max-w-5xl mx-auto px-6 sm:px-8">
-          <div className="p-8 sm:p-12 rounded-3xl bg-white/80 border border-slate-200/70 shadow-sm flex flex-col md:flex-row gap-8 items-start justify-between">
-            <div className="max-w-xl">
-              <div className="flex items-center gap-2 mb-3">
-                <ShieldCheck className="w-5 h-5 text-[#1D70B8]" />
-                <span className="text-xs uppercase tracking-[0.25em] text-[#1D70B8] font-semibold">
-                  Methodology
-                </span>
-              </div>
-              <h2 className="text-2xl sm:text-3xl font-light text-slate-900 tracking-tight mb-4">
-                Our Approach
-              </h2>
-              <p className="text-slate-600 text-sm sm:text-base font-light leading-relaxed mb-4">
-                Our collaborative operational framework and grassroots engagement procedures are
-                centered on local community empowerment, transparent stewardship, and sustainable self-reliance.
-              </p>
-              <div className="p-4 rounded-xl bg-slate-50 border border-dashed border-slate-200 text-xs sm:text-sm text-slate-500 font-mono">
-                [Detailed organizational methodology and operational guidelines will be added here.]
-              </div>
+          <div className="max-w-3xl mb-12">
+            <div className="flex items-center gap-2 mb-3">
+              <ShieldCheck className="w-5 h-5 text-[#1D70B8]" />
+              <span className="text-xs uppercase tracking-[0.25em] text-[#1D70B8] font-semibold">
+                Methodology
+              </span>
             </div>
-            <div className="flex-shrink-0 self-center md:self-start">
-              <Link
-                to="/our-work"
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-slate-900 text-white text-xs sm:text-sm font-medium hover:bg-slate-800 transition-colors shadow-sm"
-              >
-                <span>View Core Objectives</span>
-                <ArrowRight className="w-4 h-4" />
-              </Link>
-            </div>
+            <h2 className="text-3xl sm:text-4xl font-light text-slate-900 tracking-tight mb-4">
+              Our Approach
+            </h2>
+            <p className="text-slate-600 text-base sm:text-lg font-light leading-relaxed mb-4">
+              Our collaborative operational framework and grassroots engagement procedures are centered on local community empowerment, transparent stewardship, and sustainable self reliance.
+            </p>
+            <p className="text-sm sm:text-base text-slate-500 font-light">
+              Hope Together Organization executes its mission through a multifaceted, grassroots approach:
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {methodologyItems.map((item, idx) => {
+              const IconComponent = methodologyIcons[idx % methodologyIcons.length];
+              return (
+                <motion.div
+                  key={item.id}
+                  initial={{ opacity: 0, y: 15 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.4, delay: idx * 0.08 }}
+                  className="p-6 sm:p-7 rounded-2xl bg-white/80 border border-slate-200/70 hover:border-slate-300 transition-all shadow-sm flex flex-col justify-between"
+                >
+                  <div>
+                    <div className="flex items-center justify-between mb-4">
+                      <span className="text-xs font-mono font-semibold text-slate-400">
+                        {item.number} / Pillar
+                      </span>
+                      <div className="w-9 h-9 rounded-xl bg-blue-50/80 text-[#1D70B8] flex items-center justify-center">
+                        <IconComponent className="w-4 h-4" />
+                      </div>
+                    </div>
+                    <span className="inline-block px-2.5 py-0.5 rounded-full bg-slate-100 text-[11px] font-medium text-slate-600 mb-2">
+                      {item.tag}
+                    </span>
+                    <h3 className="text-lg font-medium text-slate-900 mb-2">
+                      {item.title}
+                    </h3>
+                    <p className="text-slate-600 text-xs sm:text-sm font-light leading-relaxed">
+                      {item.description}
+                    </p>
+                  </div>
+                </motion.div>
+              );
+            })}
+          </div>
+
+          <div className="mt-12 text-center">
+            <Link
+              to="/our-work"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-slate-900 text-white text-xs sm:text-sm font-medium hover:bg-slate-800 transition-colors shadow-sm"
+            >
+              <span>View Core Objectives & Work</span>
+              <ArrowRight className="w-4 h-4" />
+            </Link>
           </div>
         </div>
       </section>
