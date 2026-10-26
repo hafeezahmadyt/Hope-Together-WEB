@@ -16,6 +16,9 @@ function getStoredPartners(): AdminPartner[] {
 function saveStoredPartners(partners: AdminPartner[]): void {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(partners));
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new Event('hope_together_partners_changed'));
+    }
   } catch {
     // Ignore
   }

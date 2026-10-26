@@ -1,10 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
   Mail,
   Phone,
   MapPin,
-  Clock,
   Share2,
   CheckCircle2,
   Send,
@@ -12,11 +11,17 @@ import {
   Users,
   Compass,
   AlertCircle,
+  Facebook,
+  Instagram,
+  Linkedin,
+  Youtube,
 } from 'lucide-react';
 import { SEO } from '../components/SEO';
 import { PageHero } from '../components/PageHero';
 import { messageService } from '../services/messageService';
-import { socialLinks } from '../data/socialLinks';
+import { settingsService } from '../services/settingsService';
+import { initialMockSettings } from '../data/mock/mockSettings';
+import { AdminSiteSettings } from '../types/admin';
 
 interface FormState {
   fullName: string;
@@ -33,6 +38,7 @@ interface FormErrors {
 }
 
 export const ContactPage: React.FC = () => {
+  const [settings, setSettings] = useState<AdminSiteSettings>(initialMockSettings);
   const [formData, setFormData] = useState<FormState>({
     fullName: '',
     email: '',
@@ -40,6 +46,33 @@ export const ContactPage: React.FC = () => {
     subject: '',
     message: '',
   });
+
+  useEffect(() => {
+    let isMounted = true;
+    const loadSettings = async () => {
+      try {
+        const data = await settingsService.getSettings();
+        if (isMounted) setSettings(data);
+      } catch {
+        // Fallback
+      }
+    };
+
+    loadSettings();
+
+    const handleUpdate = () => {
+      loadSettings();
+    };
+
+    window.addEventListener('hope_together_settings_changed', handleUpdate);
+    window.addEventListener('storage', handleUpdate);
+
+    return () => {
+      isMounted = false;
+      window.removeEventListener('hope_together_settings_changed', handleUpdate);
+      window.removeEventListener('storage', handleUpdate);
+    };
+  }, []);
 
   const [errors, setErrors] = useState<FormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -135,7 +168,7 @@ export const ContactPage: React.FC = () => {
                 </p>
 
                 <div className="space-y-6">
-                  {/* Location Placeholder */}
+                  {/* Location from Settings */}
                   <div className="flex items-start gap-4 p-4 rounded-2xl bg-white/80 border border-slate-200/60 shadow-xs">
                     <div className="w-10 h-10 rounded-xl bg-blue-50 text-[#1D70B8] flex items-center justify-center flex-shrink-0 mt-0.5">
                       <MapPin className="w-5 h-5" />
@@ -145,15 +178,12 @@ export const ContactPage: React.FC = () => {
                         Regional Office
                       </span>
                       <p className="text-sm text-slate-600 font-light mt-0.5">
-                        Khyber Pakhtunkhwa, Pakistan
+                        {settings.address}
                       </p>
-                      <span className="text-xs text-slate-400 font-mono block mt-1">
-                        [Official postal address to be added]
-                      </span>
                     </div>
                   </div>
 
-                  {/* Email Placeholder */}
+                  {/* Email from Settings */}
                   <div className="flex items-start gap-4 p-4 rounded-2xl bg-white/80 border border-slate-200/60 shadow-xs">
                     <div className="w-10 h-10 rounded-xl bg-emerald-50 text-[#16A34A] flex items-center justify-center flex-shrink-0 mt-0.5">
                       <Mail className="w-5 h-5" />
@@ -163,48 +193,35 @@ export const ContactPage: React.FC = () => {
                         Official Inquiries
                       </span>
                       <a
-                        href="mailto:info@hopetogether.org.pk"
+                        href={`mailto:${settings.contactEmail}`}
                         className="text-sm text-[#1D70B8] hover:underline block mt-0.5 font-medium"
                       >
-                        info@hopetogether.org.pk
+                        {settings.contactEmail}
                       </a>
-                      <span className="text-xs text-slate-400 font-mono block mt-1">
-                        [Additional department emails pending]
-                      </span>
                     </div>
                   </div>
 
-                  {/* Phone Placeholder */}
-                  <div className="flex items-start gap-4 p-4 rounded-2xl bg-white/80 border border-slate-200/60 shadow-xs">
-                    <div className="w-10 h-10 rounded-xl bg-blue-50 text-[#1D70B8] flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <Phone className="w-5 h-5" />
+                  {/* Phone from Settings */}
+                  {settings.phone && (
+                    <div className="flex items-start gap-4 p-4 rounded-2xl bg-white/80 border border-slate-200/60 shadow-xs">
+                      <div className="w-10 h-10 rounded-xl bg-blue-50 text-[#1D70B8] flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <Phone className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <span className="text-xs font-semibold text-slate-800 uppercase tracking-wide block">
+                          Telephone
+                        </span>
+                        <a
+                          href={`tel:${settings.phone.replace(/[^0-9+]/g, '')}`}
+                          className="text-sm text-slate-700 hover:text-[#1D70B8] font-medium block mt-0.5 transition-colors"
+                        >
+                          {settings.phone}
+                        </a>
+                      </div>
                     </div>
-                    <div>
-                      <span className="text-xs font-semibold text-slate-800 uppercase tracking-wide block">
-                        Telephone
-                      </span>
-                      <span className="text-sm text-slate-500 font-mono block mt-0.5">
-                        [Official contact number placeholder]
-                      </span>
-                    </div>
-                  </div>
+                  )}
 
-                  {/* Office Hours Placeholder */}
-                  <div className="flex items-start gap-4 p-4 rounded-2xl bg-white/80 border border-slate-200/60 shadow-xs">
-                    <div className="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <Clock className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <span className="text-xs font-semibold text-slate-800 uppercase tracking-wide block">
-                        Working Hours
-                      </span>
-                      <span className="text-sm text-slate-500 font-mono block mt-0.5">
-                        [Operational hours placeholder]
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Official Social Channels */}
+                  {/* Official Social Channels from Settings */}
                   <div className="flex items-start gap-4 p-4 rounded-2xl bg-white/80 border border-slate-200/60 shadow-xs">
                     <div className="w-10 h-10 rounded-xl bg-blue-50 text-[#1D70B8] flex items-center justify-center flex-shrink-0 mt-0.5">
                       <Share2 className="w-5 h-5" />
@@ -217,23 +234,54 @@ export const ContactPage: React.FC = () => {
                         Follow our field work, community stories, and official announcements:
                       </p>
                       <div className="flex flex-wrap gap-2">
-                        {socialLinks.map((social) => {
-                          const Icon = social.icon;
-                          return (
-                            <a
-                              key={social.id}
-                              href={social.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 bg-slate-50 text-xs font-medium text-slate-700 transition-all duration-200 hover:shadow-xs active:scale-95 ${social.hoverClass}`}
-                              aria-label={social.ariaLabel}
-                              title={`${social.name}: ${social.handle}`}
-                            >
-                              <Icon className="w-3.5 h-3.5 flex-shrink-0" />
-                              <span>{social.name}</span>
-                            </a>
-                          );
-                        })}
+                        {settings.facebookUrl && (
+                          <a
+                            href={settings.facebookUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 bg-slate-50 text-xs font-medium text-slate-700 transition-all duration-200 hover:shadow-xs hover:text-[#1877F2] hover:bg-blue-50 active:scale-95"
+                            aria-label="Hope Together Organization on Facebook"
+                          >
+                            <Facebook className="w-3.5 h-3.5 flex-shrink-0" />
+                            <span>Facebook</span>
+                          </a>
+                        )}
+                        {settings.instagramUrl && (
+                          <a
+                            href={settings.instagramUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 bg-slate-50 text-xs font-medium text-slate-700 transition-all duration-200 hover:shadow-xs hover:text-[#E4405F] hover:bg-rose-50 active:scale-95"
+                            aria-label="Hope Together Organization on Instagram"
+                          >
+                            <Instagram className="w-3.5 h-3.5 flex-shrink-0" />
+                            <span>Instagram</span>
+                          </a>
+                        )}
+                        {settings.linkedinUrl && (
+                          <a
+                            href={settings.linkedinUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 bg-slate-50 text-xs font-medium text-slate-700 transition-all duration-200 hover:shadow-xs hover:text-[#0A66C2] hover:bg-sky-50 active:scale-95"
+                            aria-label="Hope Together Organization on LinkedIn"
+                          >
+                            <Linkedin className="w-3.5 h-3.5 flex-shrink-0" />
+                            <span>LinkedIn</span>
+                          </a>
+                        )}
+                        {settings.youtubeUrl && (
+                          <a
+                            href={settings.youtubeUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 bg-slate-50 text-xs font-medium text-slate-700 transition-all duration-200 hover:shadow-xs hover:text-[#FF0000] hover:bg-red-50 active:scale-95"
+                            aria-label="Hope Together Organization on YouTube"
+                          >
+                            <Youtube className="w-3.5 h-3.5 flex-shrink-0" />
+                            <span>YouTube</span>
+                          </a>
+                        )}
                       </div>
                     </div>
                   </div>

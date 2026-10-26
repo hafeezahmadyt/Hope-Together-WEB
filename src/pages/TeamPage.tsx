@@ -64,12 +64,12 @@ export const TeamPage: React.FC = () => {
         <div className="max-w-3xl mx-auto px-6 text-center">
           <p className="text-base sm:text-lg text-slate-600 font-light leading-relaxed">
             Our collective strength lies in the integrity, empathy, and localized insight of our
-            executive leadership and dedicated core team across Khyber Pakhtunkhwa.
+            dedicated core team and executive leadership across Khyber Pakhtunkhwa.
           </p>
         </div>
       </section>
 
-      {/* Sections: Executive Body & Core Team */}
+      {/* Sections: Core Team (Above) & Executive Body (Below) */}
       <div className="py-20 sm:py-28 bg-white/60 space-y-24 sm:space-y-32">
         {teamCategories.map((cat, idx) => {
           const isExecutive = cat.id === 'Executive Body' || cat.id === 'Leadership';
@@ -112,32 +112,30 @@ export const TeamPage: React.FC = () => {
                     </span>
                   ) : (
                     <span className="text-xs font-mono text-slate-400">
-                      [Official Roster Pending]
+                      0 Members
                     </span>
                   )}
                 </div>
               </div>
 
-              {/* Grid of Team Member Cards */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-                {categoryMembers.length > 0 ? (
-                  categoryMembers.map((member) => (
+              {/* Grid of Team Member Cards (Empty if no data in specific category) */}
+              {categoryMembers.length > 0 ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+                  {categoryMembers.map((member) => (
                     <TeamMemberCard
                       key={member.id}
                       member={member}
                       categoryName={cat.id}
                     />
-                  ))
-                ) : (
-                  Array.from({ length: cat.placeholderCount }).map((_, slotIdx) => (
-                    <TeamMemberCard
-                      key={slotIdx}
-                      categoryName={cat.id}
-                      index={slotIdx + 1}
-                    />
-                  ))
-                )}
-              </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="py-12 px-6 rounded-3xl bg-slate-50/50 border border-dashed border-slate-200 text-center">
+                  <p className="text-xs text-slate-400 font-light">
+                    No members currently listed in {cat.title}.
+                  </p>
+                </div>
+              )}
             </motion.section>
           );
         })}

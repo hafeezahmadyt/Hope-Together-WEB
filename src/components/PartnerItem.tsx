@@ -1,12 +1,14 @@
 import React from 'react';
 import { Users, Landmark, GraduationCap, Globe, Building } from 'lucide-react';
 import { Partner } from '../types';
+import { AdminPartner } from '../types/admin';
 
 interface PartnerItemProps {
-  partner: Partner;
+  partner: Partner | AdminPartner;
 }
 
 export const PartnerItem: React.FC<PartnerItemProps> = ({ partner }) => {
+  const logo = ('logo' in partner ? partner.logo : undefined) || ('logoUrl' in partner ? partner.logoUrl : undefined);
   // Select an appropriate subtle icon placeholder based on category or default
   const renderIconPlaceholder = () => {
     switch (partner.category) {
@@ -25,9 +27,9 @@ export const PartnerItem: React.FC<PartnerItemProps> = ({ partner }) => {
 
   const Content = (
     <div className="p-6 sm:p-8 rounded-2xl bg-white/80 border border-slate-200/60 flex flex-col items-center justify-center text-center group hover:border-slate-300 hover:shadow-sm transition-all duration-200 h-full">
-      {partner.logo ? (
+      {logo ? (
         <img
-          src={partner.logo}
+          src={logo}
           alt={partner.name}
           className="h-12 w-auto max-w-[140px] object-contain filter grayscale group-hover:grayscale-0 transition-all mb-3"
         />

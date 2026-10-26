@@ -16,6 +16,9 @@ function getStoredProjects(): AdminProject[] {
 function saveStoredProjects(projects: AdminProject[]): void {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(projects));
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new Event('hope_together_projects_changed'));
+    }
   } catch {
     // Ignore
   }

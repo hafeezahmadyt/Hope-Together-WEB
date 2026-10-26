@@ -1,13 +1,54 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowRight, Image as ImageIcon, CheckCircle2, ChevronDown, Layers, FileText } from 'lucide-react';
+import {
+  ArrowRight,
+  Image as ImageIcon,
+  CheckCircle2,
+  ChevronDown,
+  Layers,
+  FileText,
+  MapPin,
+  Clock,
+} from 'lucide-react';
 import { SEO } from '../components/SEO';
 import { PageHero } from '../components/PageHero';
 import { objectivesData } from '../data/objectives';
+import { projectService } from '../services/projectService';
+import { AdminProject } from '../types/admin';
 
 export const OurWorkPage: React.FC = () => {
   const [activeObjectiveId, setActiveObjectiveId] = useState<string | null>(null);
+  const [projects, setProjects] = useState<AdminProject[]>([]);
+
+  useEffect(() => {
+    let isMounted = true;
+    const loadProjects = async () => {
+      try {
+        const data = await projectService.getProjects();
+        if (isMounted) {
+          setProjects(data.filter((p) => p.status !== 'Draft'));
+        }
+      } catch {
+        // Fallback
+      }
+    };
+
+    loadProjects();
+
+    const handleUpdate = () => {
+      loadProjects();
+    };
+
+    window.addEventListener('hope_together_projects_changed', handleUpdate);
+    window.addEventListener('storage', handleUpdate);
+
+    return () => {
+      isMounted = false;
+      window.removeEventListener('hope_together_projects_changed', handleUpdate);
+      window.removeEventListener('storage', handleUpdate);
+    };
+  }, []);
 
   const toggleDetails = (id: string) => {
     setActiveObjectiveId((prev) => (prev === id ? null : id));
@@ -39,6 +80,10 @@ export const OurWorkPage: React.FC = () => {
             const accentBgClass = isGreen ? 'bg-[#DCFCE7] text-[#15803D]' : 'bg-[#E0F2FE] text-[#0369A1]';
             const isOpen = activeObjectiveId === objective.id;
 
+            // Projects matching this objective pillar
+            const objectiveProjects = projects.filter((p) => p.objective === objective.title);
+            const featuredProject = objectiveProjects.find((p) => p.coverImageUrl) || objectiveProjects[0];
+
             return (
               <motion.article
                 key={objective.id}
@@ -49,18 +94,24 @@ export const OurWorkPage: React.FC = () => {
                 transition={{ duration: 0.6 }}
                 className="scroll-mt-32"
               >
-                <div className={`grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center ${
-                  isEven ? 'lg:flex-row-reverse' : ''
-                }`}>
+                <div
+                  className={`grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center ${
+                    isEven ? 'lg:flex-row-reverse' : ''
+                  }`}
+                >
                   {/* Text Column */}
-                  <div className={`lg:col-span-7 flex flex-col justify-center ${
-                    isEven ? 'lg:order-2' : 'lg:order-1'
-                  }`}>
+                  <div
+                    className={`lg:col-span-7 flex flex-col justify-center ${
+                      isEven ? 'lg:order-2' : 'lg:order-1'
+                    }`}
+                  >
                     <div className="flex items-center gap-3 mb-4">
                       <span className="text-3xl sm:text-4xl font-mono font-light text-slate-300">
                         {objective.number}
                       </span>
-                      <span className={`text-[11px] font-bold px-3 py-1 rounded-full uppercase tracking-wider ${accentBgClass}`}>
+                      <span
+                        className={`text-[11px] font-bold px-3 py-1 rounded-full uppercase tracking-wider ${accentBgClass}`}
+                      >
                         Mandate Pillar
                       </span>
                     </div>
@@ -93,7 +144,7 @@ export const OurWorkPage: React.FC = () => {
                       </div>
                     </div>
 
-                    {/* Interactive Exploration / Projects Placeholder Drawer */}
+                    {/* Interactive Exploration / Projects Drawer */}
                     <div>
                       <button
                         type="button"
@@ -103,8 +154,16 @@ export const OurWorkPage: React.FC = () => {
                         aria-controls={`details-${objective.id}`}
                       >
                         <Layers className="w-4 h-4 text-slate-400" />
-                        <span>{isOpen ? 'Close Project Archive' : 'Explore Initiative Framework'}</span>
-                        <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+                        <span>
+                          {isOpen
+                            ? 'Close Project Archive'
+                            : `Explore Projects & Initiatives (${objectiveProjects.length})`}
+                        </span>
+                        <ChevronDown
+                          className={`w-4 h-4 transition-transform duration-200 ${
+                            isOpen ? 'rotate-180' : ''
+                          }`}
+                        />
                       </button>
 
                       <AnimatePresence>
@@ -117,17 +176,55 @@ export const OurWorkPage: React.FC = () => {
                             transition={{ duration: 0.3 }}
                             className="overflow-hidden mt-4"
                           >
-                            <div className="p-5 rounded-2xl bg-white/90 border border-slate-200/80 text-slate-600 text-xs sm:text-sm space-y-3 shadow-xs">
-                              <div className="flex items-center gap-2 text-slate-700 font-medium">
-                                <FileText className="w-4 h-4 text-[#1D70B8]" />
-                                <span>Initiative Documentation</span>
+                            <div className="p-5 rounded-2xl bg-white/90 border border-slate-200/80 text-slate-600 text-xs sm:text-sm space-y-4 shadow-xs">
+                              <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+                                <div className="flex items-center gap-2 text-slate-800 font-medium">
+                                  <FileText className="w-4 h-4 text-[#1D70B8]" />
+                                  <span>Registered Field Initiatives</span>
+                                </div>
+                                <span className="text-[11px] font-mono text-slate-400">
+                                  {objectiveProjects.length} {objectiveProjects.length === 1 ? 'Project' : 'Projects'}
+                                </span>
                               </div>
-                              <p className="font-mono text-xs text-slate-500 bg-slate-50 p-3 rounded-lg border border-dashed border-slate-200">
-                                [Dedicated field projects, partner alliances, and regional documentation for {objective.title} will be listed here.]
-                              </p>
-                              <div className="text-[11px] text-slate-400">
-                                Registered initiative under Hope Together Organization charter.
-                              </div>
+
+                              {objectiveProjects.length > 0 ? (
+                                <div className="space-y-3">
+                                  {objectiveProjects.map((proj) => (
+                                    <div
+                                      key={proj.id}
+                                      className="p-3.5 rounded-xl bg-slate-50/70 border border-slate-200/60 flex flex-col gap-1.5"
+                                    >
+                                      <div className="flex items-center justify-between gap-2">
+                                        <h4 className="font-semibold text-slate-900 text-sm">
+                                          {proj.title}
+                                        </h4>
+                                        <span className="text-[10px] font-semibold uppercase px-2 py-0.5 rounded-full bg-blue-100 text-[#1D70B8]">
+                                          {proj.status}
+                                        </span>
+                                      </div>
+                                      <p className="text-xs text-slate-600 leading-relaxed font-light">
+                                        {proj.description}
+                                      </p>
+                                      <div className="flex items-center gap-3 text-[11px] text-slate-400 mt-1">
+                                        <span className="flex items-center gap-1">
+                                          <MapPin className="w-3 h-3" />
+                                          {proj.location}
+                                        </span>
+                                        <span className="flex items-center gap-1">
+                                          <Clock className="w-3 h-3" />
+                                          {proj.startDate}
+                                        </span>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              ) : (
+                                <div className="p-4 rounded-xl bg-slate-50/60 border border-dashed border-slate-200 text-center">
+                                  <p className="text-xs text-slate-400 font-light">
+                                    No projects currently registered under {objective.title}.
+                                  </p>
+                                </div>
+                              )}
                             </div>
                           </motion.div>
                         )}
@@ -135,23 +232,33 @@ export const OurWorkPage: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* Visual / Image Placeholder Column */}
+                  {/* Visual / Image Column */}
                   <div className={`lg:col-span-5 ${isEven ? 'lg:order-1' : 'lg:order-2'}`}>
                     <div className="relative rounded-3xl overflow-hidden bg-white/80 border border-slate-200/70 p-6 sm:p-8 flex flex-col items-center justify-center min-h-[300px] sm:min-h-[360px] text-center shadow-[0_4px_20px_rgba(0,0,0,0.03)] group hover:border-slate-300 transition-all">
-                      <div className="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-400 group-hover:scale-105 transition-transform mb-4">
-                        <ImageIcon className="w-8 h-8 stroke-[1.5]" />
-                      </div>
-                      <span className="text-xs uppercase tracking-widest text-slate-500 font-semibold mb-1">
-                        Field Photography
-                      </span>
-                      <p className="text-xs text-slate-400 font-mono max-w-xs leading-relaxed">
-                        [High-resolution field documentation photography will be inserted here]
-                      </p>
-                      <div className="mt-4 pt-3 border-t border-slate-100 w-full flex items-center justify-center gap-2 text-[11px] text-slate-400">
-                        <span>Pillar {objective.number}</span>
-                        <span>•</span>
-                        <span>Khyber Pakhtunkhwa</span>
-                      </div>
+                      {featuredProject?.coverImageUrl ? (
+                        <img
+                          src={featuredProject.coverImageUrl}
+                          alt={featuredProject.title}
+                          className="w-full h-full object-cover absolute inset-0 rounded-3xl"
+                        />
+                      ) : (
+                        <>
+                          <div className="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-400 group-hover:scale-105 transition-transform mb-4">
+                            <ImageIcon className="w-8 h-8 stroke-[1.5]" />
+                          </div>
+                          <span className="text-xs uppercase tracking-widest text-slate-500 font-semibold mb-1">
+                            {objective.title}
+                          </span>
+                          <p className="text-xs text-slate-400 font-mono max-w-xs leading-relaxed">
+                            Official field pillar photography and active program initiatives
+                          </p>
+                          <div className="mt-4 pt-3 border-t border-slate-100 w-full flex items-center justify-center gap-2 text-[11px] text-slate-400">
+                            <span>Pillar {objective.number}</span>
+                            <span>•</span>
+                            <span>Khyber Pakhtunkhwa</span>
+                          </div>
+                        </>
+                      )}
                     </div>
                   </div>
                 </div>

@@ -16,6 +16,9 @@ function getStoredStories(): AdminStory[] {
 function saveStoredStories(stories: AdminStory[]): void {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(stories));
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new Event('hope_together_stories_changed'));
+    }
   } catch {
     // Ignore
   }

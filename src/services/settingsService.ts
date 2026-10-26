@@ -16,6 +16,9 @@ function getStoredSettings(): AdminSiteSettings {
 function saveStoredSettings(settings: AdminSiteSettings): void {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new Event('hope_together_settings_changed'));
+    }
   } catch {
     // Ignore
   }

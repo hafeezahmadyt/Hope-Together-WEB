@@ -1,39 +1,69 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowRight, Users, Landmark, GraduationCap, Globe, Handshake } from 'lucide-react';
 import { SEO } from '../components/SEO';
 import { PageHero } from '../components/PageHero';
+import { PartnerItem } from '../components/PartnerItem';
+import { partnerService } from '../services/partnerService';
+import { AdminPartner } from '../types/admin';
 
 export const PartnersPage: React.FC = () => {
+  const [partners, setPartners] = useState<AdminPartner[]>([]);
+
+  useEffect(() => {
+    let isMounted = true;
+    const loadPartners = async () => {
+      try {
+        const data = await partnerService.getPartners();
+        if (isMounted) {
+          setPartners(data);
+        }
+      } catch {
+        // Fallback
+      }
+    };
+
+    loadPartners();
+
+    const handleUpdate = () => {
+      loadPartners();
+    };
+
+    window.addEventListener('hope_together_partners_changed', handleUpdate);
+    window.addEventListener('storage', handleUpdate);
+
+    return () => {
+      isMounted = false;
+      window.removeEventListener('hope_together_partners_changed', handleUpdate);
+      window.removeEventListener('storage', handleUpdate);
+    };
+  }, []);
+
   const categoryDetails = [
     {
       category: 'Community Partners',
       icon: Users,
       description: 'Grassroots community networks, village elders, and local advocacy bodies.',
       color: 'blue',
-      slots: 4,
     },
     {
       category: 'Institutional Partners',
       icon: Landmark,
       description: 'Public sector collaborations, social welfare departments, and institutional bodies.',
       color: 'green',
-      slots: 4,
     },
     {
       category: 'Education Partners',
       icon: GraduationCap,
       description: 'Universities, vocational training centers, and skill enhancement academies.',
       color: 'blue',
-      slots: 4,
     },
     {
       category: 'Development Partners',
       icon: Globe,
       description: 'Regional and international development agencies and humanitarian coalitions.',
       color: 'green',
-      slots: 4,
     },
   ];
 
@@ -71,6 +101,9 @@ export const PartnersPage: React.FC = () => {
             const Icon = cat.icon;
             const isGreen = cat.color === 'green';
             const iconColor = isGreen ? 'text-[#16A34A] bg-emerald-50' : 'text-[#1D70B8] bg-blue-50';
+            const categoryPartners = partners
+              .filter((p) => p.category === cat.category && p.isActive !== false)
+              .sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
 
             return (
               <motion.div
@@ -96,29 +129,24 @@ export const PartnersPage: React.FC = () => {
                     </div>
                   </div>
                   <span className="text-[11px] font-mono text-slate-400 uppercase tracking-wider self-start sm:self-auto">
-                    Category {idx + 1}
+                    {categoryPartners.length} {categoryPartners.length === 1 ? 'Partner' : 'Partners'}
                   </span>
                 </div>
 
-                {/* Elegant Minimalist Logo Wall Grid */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6">
-                  {Array.from({ length: cat.slots }).map((_, slotIdx) => (
-                    <div
-                      key={slotIdx}
-                      className="p-6 sm:p-8 rounded-2xl bg-white/80 border border-slate-200/60 hover:border-slate-300 hover:shadow-xs transition-all duration-200 flex flex-col items-center justify-center text-center group min-h-[140px]"
-                    >
-                      <div className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center mb-3 text-slate-400 group-hover:text-slate-600 transition-colors">
-                        <Icon className="w-4 h-4 opacity-70" />
-                      </div>
-                      <span className="text-xs font-semibold text-slate-700 tracking-wide uppercase">
-                        Partner Slot {slotIdx + 1}
-                      </span>
-                      <span className="text-[10px] text-slate-400 mt-1 font-mono">
-                        [Logo & Credentials Pending]
-                      </span>
-                    </div>
-                  ))}
-                </div>
+                {/* Partner Grid or Empty State */}
+                {categoryPartners.length > 0 ? (
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6">
+                    {categoryPartners.map((partner) => (
+                      <PartnerItem key={partner.id} partner={partner} />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="py-10 px-6 rounded-2xl bg-slate-50/50 border border-dashed border-slate-200 text-center">
+                    <p className="text-xs text-slate-400 font-light">
+                      No partners currently listed in {cat.category}.
+                    </p>
+                  </div>
+                )}
               </motion.div>
             );
           })}

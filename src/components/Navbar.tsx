@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, Link, useLocation } from 'react-router-dom';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, Facebook, Instagram, Linkedin, Youtube } from 'lucide-react';
 import logoImg from '../assets/logo.png';
-import { socialLinks } from '../data/socialLinks';
+import { settingsService } from '../services/settingsService';
+import { initialMockSettings } from '../data/mock/mockSettings';
+import { AdminSiteSettings } from '../types/admin';
 
 interface NavItem {
   label: string;
@@ -21,7 +23,35 @@ const navItems: NavItem[] = [
 export const Navbar: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [settings, setSettings] = useState<AdminSiteSettings>(initialMockSettings);
   const location = useLocation();
+
+  useEffect(() => {
+    let isMounted = true;
+    const loadSettings = async () => {
+      try {
+        const data = await settingsService.getSettings();
+        if (isMounted) setSettings(data);
+      } catch {
+        // Fallback
+      }
+    };
+
+    loadSettings();
+
+    const handleUpdate = () => {
+      loadSettings();
+    };
+
+    window.addEventListener('hope_together_settings_changed', handleUpdate);
+    window.addEventListener('storage', handleUpdate);
+
+    return () => {
+      isMounted = false;
+      window.removeEventListener('hope_together_settings_changed', handleUpdate);
+      window.removeEventListener('storage', handleUpdate);
+    };
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -154,22 +184,54 @@ export const Navbar: React.FC = () => {
                 Get Involved
               </Link>
               <div className="flex items-center justify-center gap-3 pt-1">
-                {socialLinks.map((social) => {
-                  const Icon = social.icon;
-                  return (
-                    <a
-                      key={social.id}
-                      href={social.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={`w-9 h-9 rounded-xl flex items-center justify-center border border-slate-200/80 bg-slate-50 text-slate-600 transition-all ${social.hoverClass}`}
-                      aria-label={social.ariaLabel}
-                      title={social.name}
-                    >
-                      <Icon className="w-4 h-4" />
-                    </a>
-                  );
-                })}
+                {settings.facebookUrl && (
+                  <a
+                    href={settings.facebookUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-9 h-9 rounded-xl flex items-center justify-center border border-slate-200/80 bg-slate-50 text-slate-600 transition-all hover:text-[#1877F2] hover:bg-blue-50"
+                    aria-label="Facebook"
+                    title="Facebook"
+                  >
+                    <Facebook className="w-4 h-4" />
+                  </a>
+                )}
+                {settings.instagramUrl && (
+                  <a
+                    href={settings.instagramUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-9 h-9 rounded-xl flex items-center justify-center border border-slate-200/80 bg-slate-50 text-slate-600 transition-all hover:text-[#E4405F] hover:bg-rose-50"
+                    aria-label="Instagram"
+                    title="Instagram"
+                  >
+                    <Instagram className="w-4 h-4" />
+                  </a>
+                )}
+                {settings.linkedinUrl && (
+                  <a
+                    href={settings.linkedinUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-9 h-9 rounded-xl flex items-center justify-center border border-slate-200/80 bg-slate-50 text-slate-600 transition-all hover:text-[#0A66C2] hover:bg-sky-50"
+                    aria-label="LinkedIn"
+                    title="LinkedIn"
+                  >
+                    <Linkedin className="w-4 h-4" />
+                  </a>
+                )}
+                {settings.youtubeUrl && (
+                  <a
+                    href={settings.youtubeUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-9 h-9 rounded-xl flex items-center justify-center border border-slate-200/80 bg-slate-50 text-slate-600 transition-all hover:text-[#FF0000] hover:bg-red-50"
+                    aria-label="YouTube"
+                    title="YouTube"
+                  >
+                    <Youtube className="w-4 h-4" />
+                  </a>
+                )}
               </div>
             </div>
           </nav>

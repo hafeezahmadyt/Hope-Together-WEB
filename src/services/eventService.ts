@@ -16,6 +16,9 @@ function getStoredEvents(): AdminEvent[] {
 function saveStoredEvents(events: AdminEvent[]): void {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(events));
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new Event('hope_together_events_changed'));
+    }
   } catch {
     // Ignore
   }
