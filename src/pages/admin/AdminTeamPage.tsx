@@ -8,6 +8,15 @@ import {
   Image as ImageIcon,
   Check,
   X,
+  UploadCloud,
+  Settings,
+  RefreshCw,
+  ExternalLink,
+  ShieldCheck,
+  AlertTriangle,
+  Key,
+  Eye,
+  EyeOff,
 } from 'lucide-react';
 import { SEO } from '../../components/SEO';
 import { AdminPageHeader } from '../../components/admin/AdminPageHeader';
@@ -18,6 +27,7 @@ import { ConfirmModal } from '../../components/admin/ConfirmModal';
 import { Toast, ToastMessage } from '../../components/admin/Toast';
 import { teamService } from '../../services/teamService';
 import { activityService } from '../../services/activityService';
+import { githubSyncService, GitHubSyncSettings } from '../../services/githubSyncService';
 import { AdminTeamMember } from '../../types/admin';
 
 export const AdminTeamPage: React.FC = () => {
@@ -35,12 +45,24 @@ export const AdminTeamPage: React.FC = () => {
   const [isReadingPhoto, setIsReadingPhoto] = useState(false);
   const [toast, setToast] = useState<ToastMessage | null>(null);
 
+  // GitHub Auto-Deploy / Sync State
+  const [isSyncModalOpen, setIsSyncModalOpen] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [isTestingGitHub, setIsTestingGitHub] = useState(false);
+  const [showToken, setShowToken] = useState(false);
+  const [githubSettings, setGithubSettings] = useState<GitHubSyncSettings>(() =>
+    githubSyncService.getSettings()
+  );
+  const [testResult, setTestResult] = useState<{ success: boolean; user?: string; error?: string } | null>(
+    null
+  );
+
   // Form State
   const [formData, setFormData] = useState({
     name: '',
     position: '',
     bio: '',
-    category: 'Executive Body' as 'Executive Body' | 'Core Team' | string,
+    category: 'Core Team' as 'Executive Body' | 'Core Team' | string,
     photoUrl: '',
     email: '',
     linkedinUrl: '',
@@ -79,7 +101,7 @@ export const AdminTeamPage: React.FC = () => {
       name: '',
       position: '',
       bio: '',
-      category: 'Executive Body',
+      category: 'Core Team',
       photoUrl: '',
       email: '',
       linkedinUrl: '',
@@ -124,15 +146,28 @@ export const AdminTeamPage: React.FC = () => {
     if (!validateForm()) return;
 
     setIsSaving(true);
+    const isGithubConnected = githubSyncService.isConfigured();
     try {
       if (editingMember) {
         await teamService.updateTeamMember(editingMember.id, formData);
         await activityService.logActivity('updated', 'Team Member', formData.name);
-        setToast({ id: String(Date.now()), type: 'success', text: `Updated "${formData.name}" successfully.` });
+        setToast({
+          id: String(Date.now()),
+          type: 'success',
+          text: isGithubConnected
+            ? `Updated "${formData.name}" & uploaded photo to GitHub! Cloudflare Pages will deploy shortly.`
+            : `Updated "${formData.name}". Connect GitHub to auto-deploy to live site.`,
+        });
       } else {
         await teamService.createTeamMember(formData);
         await activityService.logActivity('added', 'Team Member', formData.name);
-        setToast({ id: String(Date.now()), type: 'success', text: `Added "${formData.name}" successfully.` });
+        setToast({
+          id: String(Date.now()),
+          type: 'success',
+          text: isGithubConnected
+            ? `Added "${formData.name}" & uploaded photo to GitHub! Cloudflare Pages will deploy shortly.`
+            : `Added "${formData.name}". Connect GitHub to auto-deploy to live site.`,
+        });
       }
       setIsFormOpen(false);
       loadMembers();
@@ -156,6 +191,62 @@ export const AdminTeamPage: React.FC = () => {
       setToast({ id: String(Date.now()), type: 'error', text: 'Failed to delete team member.' });
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handleTestGitHubConnection = async () => {
+    setIsTestingGitHub(true);
+    setTestResult(null);
+    try {
+      githubSyncService.saveSettings(githubSettings);
+      const res = await githubSyncService.testConnection();
+      setTestResult(res);
+    } finally {
+      setIsTestingGitHub(false);
+    }
+  };
+
+  const handleSaveGitHubSettings = (e: React.FormEvent) => {
+    e.preventDefault();
+    githubSyncService.saveSettings(githubSettings);
+    setToast({
+      id: String(Date.now()),
+      type: 'success',
+      text: 'GitHub Auto-Deploy settings saved successfully!',
+    });
+    setIsSyncModalOpen(false);
+  };
+
+  const handleManualSync = async () => {
+    if (!githubSyncService.isConfigured()) {
+      setIsSyncModalOpen(true);
+      return;
+    }
+    setIsSyncing(true);
+    try {
+      const res = await teamService.syncToGithub();
+      if (res.success) {
+        setToast({
+          id: String(Date.now()),
+          type: 'success',
+          text: `Successfully synced ${res.deployedCount} team members to GitHub! Cloudflare Pages build triggered.`,
+        });
+        loadMembers();
+      } else {
+        setToast({
+          id: String(Date.now()),
+          type: 'error',
+          text: `GitHub sync error: ${res.error}`,
+        });
+      }
+    } catch (err: any) {
+      setToast({
+        id: String(Date.now()),
+        type: 'error',
+        text: err?.message || 'Failed to sync with GitHub.',
+      });
+    } finally {
+      setIsSyncing(false);
     }
   };
 
@@ -203,6 +294,69 @@ export const AdminTeamPage: React.FC = () => {
           icon: Plus,
         }}
       />
+
+      {/* GitHub Auto-Deploy / Cloudflare Sync Bar */}
+      <div className="mb-6 p-4 rounded-2xl bg-white border border-slate-200/80 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <div
+            className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${
+              githubSyncService.isConfigured()
+                ? 'bg-emerald-50 text-emerald-600 border border-emerald-100'
+                : 'bg-amber-50 text-amber-600 border border-amber-100'
+            }`}
+          >
+            <UploadCloud className="w-5 h-5" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-semibold text-slate-800">
+                GitHub Auto-Deploy & Sync
+              </span>
+              <span
+                className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium ${
+                  githubSyncService.isConfigured()
+                    ? 'bg-emerald-100/70 text-emerald-700'
+                    : 'bg-amber-100/70 text-amber-700'
+                }`}
+              >
+                <span
+                  className={`w-1.5 h-1.5 rounded-full ${
+                    githubSyncService.isConfigured() ? 'bg-emerald-500' : 'bg-amber-500'
+                  }`}
+                />
+                {githubSyncService.isConfigured() ? 'Connected' : 'Token Required'}
+              </span>
+            </div>
+            <p className="text-[11px] text-slate-500">
+              {githubSyncService.isConfigured()
+                ? `Syncs directly to repo: ${githubSettings.owner}/${githubSettings.repo} (${githubSettings.branch})`
+                : 'Connect GitHub to automatically upload member pictures and publish changes to Cloudflare Pages for all devices.'}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2 self-start sm:self-auto">
+          {githubSyncService.isConfigured() && (
+            <button
+              type="button"
+              onClick={handleManualSync}
+              disabled={isSyncing}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 text-white text-xs font-medium hover:bg-slate-800 transition shadow-2xs disabled:opacity-50 cursor-pointer"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${isSyncing ? 'animate-spin' : ''}`} />
+              <span>{isSyncing ? 'Deploying...' : 'Sync & Deploy to GitHub'}</span>
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={() => setIsSyncModalOpen(true)}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-medium transition cursor-pointer"
+          >
+            <Settings className="w-3.5 h-3.5 text-slate-500" />
+            <span>{githubSyncService.isConfigured() ? 'Sync Settings' : 'Connect GitHub'}</span>
+          </button>
+        </div>
+      </div>
 
       {/* Search and Category Filter */}
       <SearchFilterBar
@@ -566,6 +720,207 @@ export const AdminTeamPage: React.FC = () => {
                       : 'Save Member'}
                   </span>
                 </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* GitHub Sync Modal */}
+      {isSyncModalOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-xs animate-in fade-in duration-200"
+          role="dialog"
+          aria-modal="true"
+        >
+          <div className="w-full max-w-lg bg-white rounded-3xl border border-slate-200 shadow-2xl max-h-[90vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
+            {/* Modal Header */}
+            <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 bg-slate-100 text-slate-800 rounded-xl">
+                  <UploadCloud className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-semibold text-slate-900 tracking-tight">
+                    GitHub Cloud Deployment Setup
+                  </h3>
+                  <p className="text-xs text-slate-400">
+                    Upload photos & data straight to your GitHub repository.
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsSyncModalOpen(false)}
+                className="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <form onSubmit={handleSaveGitHubSettings} className="p-6 overflow-y-auto space-y-4 flex-1">
+              {/* Info Note */}
+              <div className="p-3.5 rounded-2xl bg-blue-50/70 border border-blue-100 text-xs text-blue-900 space-y-1">
+                <div className="font-semibold flex items-center gap-1.5">
+                  <ShieldCheck className="w-4 h-4 text-[#1D70B8]" />
+                  Automatic Cloudflare Pages Redeployment
+                </div>
+                <p className="text-[11px] text-blue-800/90 leading-relaxed">
+                  When you add or edit someone with a photo, it will automatically commit the photo to <code className="bg-white/70 px-1 py-0.5 rounded font-mono">public/assets/team/</code> and commit the team data to GitHub. Cloudflare Pages automatically rebuilds within 1 minute, displaying your changes on phones and PCs worldwide.
+                </p>
+              </div>
+
+              {/* GitHub Token */}
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="text-xs font-semibold text-slate-700 uppercase tracking-wider flex items-center gap-1">
+                    <Key className="w-3.5 h-3.5" />
+                    GitHub Personal Access Token (PAT)
+                  </label>
+                  <a
+                    href="https://github.com/settings/tokens"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[11px] text-[#1D70B8] hover:underline inline-flex items-center gap-1"
+                  >
+                    <span>Generate token on GitHub</span>
+                    <ExternalLink className="w-3 h-3" />
+                  </a>
+                </div>
+                <div className="relative">
+                  <input
+                    type={showToken ? 'text' : 'password'}
+                    value={githubSettings.token}
+                    onChange={(e) =>
+                      setGithubSettings({ ...githubSettings, token: e.target.value })
+                    }
+                    placeholder="ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+                    className="w-full pl-3.5 pr-10 py-2.5 rounded-xl border border-slate-200 bg-slate-50/40 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-[#1D70B8]"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowToken(!showToken)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                  >
+                    {showToken ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+                <p className="text-[11px] text-slate-400 mt-1">
+                  Required scopes: <code className="font-mono text-slate-600 bg-slate-100 px-1 rounded">repo</code> (Full control of repositories). Stored securely in your admin browser.
+                </p>
+              </div>
+
+              {/* Repo Owner & Name */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[11px] font-semibold text-slate-600 uppercase tracking-wider mb-1">
+                    Repository Owner
+                  </label>
+                  <input
+                    type="text"
+                    value={githubSettings.owner}
+                    onChange={(e) =>
+                      setGithubSettings({ ...githubSettings, owner: e.target.value })
+                    }
+                    className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs bg-slate-50/40"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-semibold text-slate-600 uppercase tracking-wider mb-1">
+                    Repository Name
+                  </label>
+                  <input
+                    type="text"
+                    value={githubSettings.repo}
+                    onChange={(e) =>
+                      setGithubSettings({ ...githubSettings, repo: e.target.value })
+                    }
+                    className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs bg-slate-50/40"
+                  />
+                </div>
+              </div>
+
+              {/* Branch */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[11px] font-semibold text-slate-600 uppercase tracking-wider mb-1">
+                    Target Branch
+                  </label>
+                  <input
+                    type="text"
+                    value={githubSettings.branch}
+                    onChange={(e) =>
+                      setGithubSettings({ ...githubSettings, branch: e.target.value })
+                    }
+                    className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs bg-slate-50/40"
+                  />
+                </div>
+
+                <div className="flex items-center pt-5">
+                  <label className="flex items-center gap-2 cursor-pointer text-xs font-medium text-slate-700">
+                    <input
+                      type="checkbox"
+                      checked={githubSettings.autoSync}
+                      onChange={(e) =>
+                        setGithubSettings({ ...githubSettings, autoSync: e.target.checked })
+                      }
+                      className="rounded text-[#1D70B8] focus:ring-[#1D70B8] w-4 h-4 cursor-pointer"
+                    />
+                    <span>Auto-upload on Save</span>
+                  </label>
+                </div>
+              </div>
+
+              {/* Test Result Message */}
+              {testResult && (
+                <div
+                  className={`p-3 rounded-xl text-xs flex items-center gap-2 ${
+                    testResult.success
+                      ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                      : 'bg-red-50 text-red-800 border border-red-200'
+                  }`}
+                >
+                  {testResult.success ? (
+                    <ShieldCheck className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+                  ) : (
+                    <AlertTriangle className="w-4 h-4 text-red-600 flex-shrink-0" />
+                  )}
+                  <span>
+                    {testResult.success
+                      ? `Verified successfully! Connected as @${testResult.user} with write access to ${githubSettings.owner}/${githubSettings.repo}.`
+                      : testResult.error}
+                  </span>
+                </div>
+              )}
+
+              {/* Action Buttons */}
+              <div className="pt-4 border-t border-slate-100 flex items-center justify-between gap-3">
+                <button
+                  type="button"
+                  onClick={handleTestGitHubConnection}
+                  disabled={isTestingGitHub || !githubSettings.token}
+                  className="px-3.5 py-2 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-medium transition cursor-pointer disabled:opacity-50 flex items-center gap-1.5"
+                >
+                  <RefreshCw className={`w-3.5 h-3.5 ${isTestingGitHub ? 'animate-spin' : ''}`} />
+                  <span>{isTestingGitHub ? 'Testing...' : 'Test Connection'}</span>
+                </button>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setIsSyncModalOpen(false)}
+                    className="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 text-xs font-medium transition"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-4 py-2 rounded-xl bg-slate-900 text-white text-xs font-semibold hover:bg-slate-800 transition shadow-xs cursor-pointer"
+                  >
+                    Save Settings
+                  </button>
+                </div>
               </div>
             </form>
           </div>

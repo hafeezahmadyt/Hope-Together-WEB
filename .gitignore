@@ -20,4 +20,8 @@ dist/
 .DS_Store
 Thumbs.db
 
+# Agent metadata
+.agent/
+.agents/
+
 stitch_hope_together_organization_portal (2)/
