@@ -40,13 +40,13 @@ export const TeamMemberCard: React.FC<TeamMemberCardProps> = ({
         className="p-6 rounded-3xl bg-white/80 border border-slate-200/70 hover:border-slate-300 transition-all duration-300 shadow-[0_2px_12px_rgba(0,0,0,0.02)] hover:shadow-xl hover:-translate-y-1 flex flex-col justify-between h-full group cursor-pointer relative"
       >
         <div>
-          {/* Photograph Container with Animated Hover Overlay */}
+          {/* Photograph Container: remains in place, untouched */}
           <div className="aspect-[4/3] rounded-2xl overflow-hidden bg-slate-100 mb-5 relative flex items-center justify-center">
             {photo ? (
               <img
                 src={photo}
                 alt={member.name}
-                className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+                className="w-full h-full object-cover"
               />
             ) : (
               <div className="flex flex-col items-center justify-center text-slate-400">
@@ -54,28 +54,43 @@ export const TeamMemberCard: React.FC<TeamMemberCardProps> = ({
                 <span className="text-[11px] font-mono">[Official Photo]</span>
               </div>
             )}
+          </div>
 
-            {/* Decent Animation: Hover / Touch Overlay for "About" */}
+          {/* Below Image Content Area */}
+          <div className="relative min-h-[130px] flex flex-col justify-start">
+            {/* Resting State: Designation & Name (Disappears on hover in decent animation) */}
             <div
-              className={`absolute inset-0 bg-gradient-to-t from-slate-950/95 via-slate-900/90 to-slate-900/75 backdrop-blur-[3px] p-5 flex flex-col justify-between transition-all duration-300 ease-out z-10 ${
+              className={`transition-all duration-300 ease-out flex flex-col justify-start ${
+                isTouchActive
+                  ? 'opacity-0 -translate-y-2 pointer-events-none'
+                  : 'group-hover:opacity-0 group-hover:-translate-y-2 group-hover:pointer-events-none'
+              }`}
+            >
+              <span className="text-[11px] font-semibold text-[#1D70B8] uppercase tracking-wider block mb-1">
+                {member.position}
+              </span>
+              <h3 className="text-xl font-medium text-slate-900 tracking-tight">
+                {member.name}
+              </h3>
+            </div>
+
+            {/* Hover State: More Data (About & Social Links appear below in decent animation) */}
+            <div
+              className={`absolute inset-0 flex flex-col justify-between transition-all duration-300 ease-out ${
                 isTouchActive
                   ? 'opacity-100 translate-y-0 pointer-events-auto'
-                  : 'opacity-0 translate-y-3 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto'
+                  : 'opacity-0 translate-y-2 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto'
               }`}
             >
               <div>
-                <div className="flex items-center justify-between mb-2.5 pb-2 border-b border-white/10">
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white/10 text-sky-300 text-[10px] font-semibold tracking-wider uppercase backdrop-blur-xs">
-                    <Info className="w-3 h-3 text-sky-400" />
+                <div className="flex items-center gap-1.5 mb-1.5">
+                  <span className="text-[10px] font-semibold text-[#1D70B8] uppercase tracking-wider inline-flex items-center gap-1">
+                    <Info className="w-3 h-3" />
                     About
                   </span>
-                  <span className="text-[10px] font-mono text-slate-400 truncate max-w-[130px]">
-                    {member.position}
-                  </span>
                 </div>
-
-                <div className="overflow-y-auto max-h-[135px] pr-1 text-left">
-                  <p className="text-slate-200 text-xs sm:text-sm font-light leading-relaxed">
+                <div className="overflow-y-auto max-h-[85px] pr-1">
+                  <p className="text-slate-600 text-xs sm:text-sm font-light leading-relaxed">
                     {hasAbout
                       ? member.bio
                       : `Official profile of ${member.name}, serving as ${member.position} at Hope Together Organization.`}
@@ -84,7 +99,7 @@ export const TeamMemberCard: React.FC<TeamMemberCardProps> = ({
               </div>
 
               {socialList.length > 0 && (
-                <div className="pt-3 border-t border-white/10 flex items-center gap-2.5 text-slate-300">
+                <div className="pt-2 border-t border-slate-100 flex items-center gap-3 text-slate-400">
                   {socialList.map((link, i) => (
                     <a
                       key={i}
@@ -92,19 +107,19 @@ export const TeamMemberCard: React.FC<TeamMemberCardProps> = ({
                       target="_blank"
                       rel="noopener noreferrer"
                       onClick={(e) => e.stopPropagation()}
-                      className="p-1.5 rounded-lg bg-white/5 hover:bg-white/15 text-slate-300 hover:text-white transition-colors"
+                      className="p-1 rounded-md hover:bg-slate-100 text-slate-400 hover:text-slate-900 transition-colors"
                       aria-label={`${member.name} on ${link.platform}`}
                     >
                       {link.platform.toLowerCase() === 'linkedin' ? (
-                        <Linkedin className="w-3.5 h-3.5 text-[#0A66C2]" />
+                        <Linkedin className="w-4 h-4 hover:text-[#0A66C2]" />
                       ) : link.platform.toLowerCase() === 'instagram' ? (
-                        <Instagram className="w-3.5 h-3.5 text-[#E4405F]" />
+                        <Instagram className="w-4 h-4 hover:text-[#E4405F]" />
                       ) : link.platform.toLowerCase() === 'facebook' ? (
-                        <Facebook className="w-3.5 h-3.5 text-[#1877F2]" />
+                        <Facebook className="w-4 h-4 hover:text-[#1877F2]" />
                       ) : link.platform.toLowerCase() === 'twitter' ? (
-                        <Twitter className="w-3.5 h-3.5 text-[#1DA1F2]" />
+                        <Twitter className="w-4 h-4 hover:text-[#1DA1F2]" />
                       ) : (
-                        <Mail className="w-3.5 h-3.5 text-[#1D70B8]" />
+                        <Mail className="w-4 h-4 hover:text-[#1D70B8]" />
                       )}
                     </a>
                   ))}
@@ -112,14 +127,6 @@ export const TeamMemberCard: React.FC<TeamMemberCardProps> = ({
               )}
             </div>
           </div>
-
-          {/* Statically shows ONLY the designation and name */}
-          <span className="text-[11px] font-semibold text-[#1D70B8] uppercase tracking-wider block mb-1 transition-colors group-hover:text-[#155A96]">
-            {member.position}
-          </span>
-          <h3 className="text-xl font-medium text-slate-900 tracking-tight group-hover:text-slate-950 transition-colors">
-            {member.name}
-          </h3>
         </div>
       </div>
     );
