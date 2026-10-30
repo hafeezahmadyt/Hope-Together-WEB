@@ -1,7 +1,77 @@
 import { AdminTeamMember } from '../../types/admin';
 
-/**
- * Initial mock team members dataset for the Admin CMS.
- * Set to an empty array so administrators can populate official records from scratch through the Admin Portal.
- */
-export const initialMockTeamMembers: AdminTeamMember[] = [];
+export const initialMockTeamMembers: AdminTeamMember[] = [
+  // Core Team (Displayed Above)
+  {
+    id: 'team-1',
+    name: 'Afeefa Akram',
+    position: 'Director Women Forum',
+    category: 'Core Team',
+    bio: 'A passionate law student deeply committed to women’s education, climate change advocacy, and social welfare. Experienced with UNICEF initiatives addressing child marriage and promoting girls’ education.',
+    email: 'hopetogether.org@gmail.com',
+    photoUrl: '/assets/team/afeefa-akram.jpg',
+    instagramUrl: 'https://www.instagram.com/p/DTlGbvpDNpY/',
+    displayOrder: 1,
+    isActive: true,
+  },
+  {
+    id: 'team-2',
+    name: 'Umar Farooq',
+    position: 'Director Programs',
+    category: 'Core Team',
+    bio: 'Directs grassroots program execution, educational workshops, youth capacity-building camps, and community outreach operations across regional community networks.',
+    email: 'hopetogether.org@gmail.com',
+    instagramUrl: 'https://www.instagram.com/hopetogetherorganization/',
+    displayOrder: 2,
+    isActive: true,
+  },
+
+  // Executive Body (Displayed Below)
+  {
+    id: 'team-3',
+    name: 'Hafeez Ahmad',
+    position: 'Vice President',
+    category: 'Executive Body',
+    bio: 'Executive leadership and strategic stewardship for Hope Together Organization, spearheading institutional partnerships, collaborative MoUs, and youth empowerment initiatives across Khyber Pakhtunkhwa.',
+    email: 'hopetogether.org@gmail.com',
+    instagramUrl: 'https://www.instagram.com/hopetogetherorganization/',
+    facebookUrl: 'https://www.facebook.com/HopeTogetherKP/',
+    linkedinUrl: 'https://www.linkedin.com/company/hope-together-organization/',
+    displayOrder: 1,
+    isActive: true,
+  },
+  {
+    id: 'team-4',
+    name: 'Maheen Kamran',
+    position: 'General Secretary',
+    category: 'Executive Body',
+    bio: 'A gold medalist in Peace and Conflict Studies, dedicated to advancing peace, social cohesion, and human rights through conflict resolution, diplomacy, and community stewardship.',
+    email: 'hopetogether.org@gmail.com',
+    photoUrl: '/assets/team/maheen-kamran.jpg',
+    instagramUrl: 'https://www.instagram.com/p/DShz8wliAes/',
+    displayOrder: 2,
+    isActive: true,
+  },
+  {
+    id: 'team-5',
+    name: 'Mehnaz Javed',
+    position: 'Executive Director',
+    category: 'Executive Body',
+    bio: 'Provides strategic guidance on peacebuilding, public health awareness, youth leadership, and non-profit collaborations across regional community networks.',
+    email: 'hopetogether.org@gmail.com',
+    instagramUrl: 'https://www.instagram.com/hopetogetherorganization/',
+    displayOrder: 3,
+    isActive: true,
+  },
+  {
+    id: 'team-6',
+    name: 'Jibran Shah',
+    position: 'President / Regional Affairs',
+    category: 'Executive Body',
+    bio: 'Leads community welfare projects and regional stakeholder outreach, coordinating vital development programs including clean water and youth infrastructure across Charsadda and KP.',
+    email: 'hopetogether.org@gmail.com',
+    facebookUrl: 'https://www.facebook.com/HopeTogetherKP/',
+    displayOrder: 4,
+    isActive: true,
+  },
+];

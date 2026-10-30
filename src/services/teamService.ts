@@ -6,7 +6,12 @@ const STORAGE_KEY = 'hope_together_cms_team';
 function getStoredMembers(): AdminTeamMember[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) return JSON.parse(raw);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed;
+      }
+    }
   } catch {
     // Fallback
   }
