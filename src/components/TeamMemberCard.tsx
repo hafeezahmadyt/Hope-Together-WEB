@@ -1,5 +1,5 @@
-import React from 'react';
-import { User, Linkedin, Twitter, Mail, Instagram, Facebook } from 'lucide-react';
+import React, { useState } from 'react';
+import { User, Linkedin, Twitter, Mail, Instagram, Facebook, Info } from 'lucide-react';
 import { TeamMember } from '../types';
 import { AdminTeamMember } from '../types/admin';
 
@@ -16,6 +16,8 @@ export const TeamMemberCard: React.FC<TeamMemberCardProps> = ({
   categoryName = 'Team',
   index = 1,
 }) => {
+  const [isTouchActive, setIsTouchActive] = useState(false);
+
   if (member) {
     const adminMember = member as AdminTeamMember;
     const photo = adminMember.photoUrl || (member as TeamMember).image;
@@ -30,16 +32,21 @@ export const TeamMemberCard: React.FC<TeamMemberCardProps> = ({
           adminMember.email ? { platform: 'mail', url: `mailto:${adminMember.email}` } : null,
         ].filter(Boolean) as { platform: string; url: string }[];
 
+    const hasAbout = Boolean(member.bio && member.bio.trim().length > 0);
+
     return (
-      <div className="p-6 rounded-3xl bg-white/80 border border-slate-200/70 hover:border-slate-300 transition-all duration-300 shadow-[0_2px_12px_rgba(0,0,0,0.02)] hover:shadow-md flex flex-col justify-between h-full group">
+      <div
+        onClick={() => setIsTouchActive((prev) => !prev)}
+        className="p-6 rounded-3xl bg-white/80 border border-slate-200/70 hover:border-slate-300 transition-all duration-300 shadow-[0_2px_12px_rgba(0,0,0,0.02)] hover:shadow-xl hover:-translate-y-1 flex flex-col justify-between h-full group cursor-pointer relative"
+      >
         <div>
-          {/* Photograph Container */}
+          {/* Photograph Container with Animated Hover Overlay */}
           <div className="aspect-[4/3] rounded-2xl overflow-hidden bg-slate-100 mb-5 relative flex items-center justify-center">
             {photo ? (
               <img
                 src={photo}
                 alt={member.name}
-                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
               />
             ) : (
               <div className="flex flex-col items-center justify-center text-slate-400">
@@ -47,48 +54,73 @@ export const TeamMemberCard: React.FC<TeamMemberCardProps> = ({
                 <span className="text-[11px] font-mono">[Official Photo]</span>
               </div>
             )}
+
+            {/* Decent Animation: Hover / Touch Overlay for "About" */}
+            <div
+              className={`absolute inset-0 bg-gradient-to-t from-slate-950/95 via-slate-900/90 to-slate-900/75 backdrop-blur-[3px] p-5 flex flex-col justify-between transition-all duration-300 ease-out z-10 ${
+                isTouchActive
+                  ? 'opacity-100 translate-y-0 pointer-events-auto'
+                  : 'opacity-0 translate-y-3 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto'
+              }`}
+            >
+              <div>
+                <div className="flex items-center justify-between mb-2.5 pb-2 border-b border-white/10">
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white/10 text-sky-300 text-[10px] font-semibold tracking-wider uppercase backdrop-blur-xs">
+                    <Info className="w-3 h-3 text-sky-400" />
+                    About
+                  </span>
+                  <span className="text-[10px] font-mono text-slate-400 truncate max-w-[130px]">
+                    {member.position}
+                  </span>
+                </div>
+
+                <div className="overflow-y-auto max-h-[135px] pr-1 text-left">
+                  <p className="text-slate-200 text-xs sm:text-sm font-light leading-relaxed">
+                    {hasAbout
+                      ? member.bio
+                      : `Official profile of ${member.name}, serving as ${member.position} at Hope Together Organization.`}
+                  </p>
+                </div>
+              </div>
+
+              {socialList.length > 0 && (
+                <div className="pt-3 border-t border-white/10 flex items-center gap-2.5 text-slate-300">
+                  {socialList.map((link, i) => (
+                    <a
+                      key={i}
+                      href={link.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={(e) => e.stopPropagation()}
+                      className="p-1.5 rounded-lg bg-white/5 hover:bg-white/15 text-slate-300 hover:text-white transition-colors"
+                      aria-label={`${member.name} on ${link.platform}`}
+                    >
+                      {link.platform.toLowerCase() === 'linkedin' ? (
+                        <Linkedin className="w-3.5 h-3.5 text-[#0A66C2]" />
+                      ) : link.platform.toLowerCase() === 'instagram' ? (
+                        <Instagram className="w-3.5 h-3.5 text-[#E4405F]" />
+                      ) : link.platform.toLowerCase() === 'facebook' ? (
+                        <Facebook className="w-3.5 h-3.5 text-[#1877F2]" />
+                      ) : link.platform.toLowerCase() === 'twitter' ? (
+                        <Twitter className="w-3.5 h-3.5 text-[#1DA1F2]" />
+                      ) : (
+                        <Mail className="w-3.5 h-3.5 text-[#1D70B8]" />
+                      )}
+                    </a>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
 
-          <span className="text-[11px] font-semibold text-[#1D70B8] uppercase tracking-wider block mb-1">
+          {/* Statically shows ONLY the designation and name */}
+          <span className="text-[11px] font-semibold text-[#1D70B8] uppercase tracking-wider block mb-1 transition-colors group-hover:text-[#155A96]">
             {member.position}
           </span>
-          <h3 className="text-xl font-medium text-slate-900 mb-3 tracking-tight">
+          <h3 className="text-xl font-medium text-slate-900 tracking-tight group-hover:text-slate-950 transition-colors">
             {member.name}
           </h3>
-
-          {member.bio && (
-            <p className="text-slate-600 text-sm font-light leading-relaxed mb-4">
-              {member.bio}
-            </p>
-          )}
         </div>
-
-        {socialList.length > 0 && (
-          <div className="pt-4 border-t border-slate-100 flex items-center gap-3 text-slate-400">
-            {socialList.map((link, i) => (
-              <a
-                key={i}
-                href={link.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:text-slate-900 transition-colors p-1"
-                aria-label={`${member.name} on ${link.platform}`}
-              >
-                {link.platform.toLowerCase() === 'linkedin' ? (
-                  <Linkedin className="w-4 h-4 hover:text-[#0A66C2]" />
-                ) : link.platform.toLowerCase() === 'instagram' ? (
-                  <Instagram className="w-4 h-4 hover:text-[#E4405F]" />
-                ) : link.platform.toLowerCase() === 'facebook' ? (
-                  <Facebook className="w-4 h-4 hover:text-[#1877F2]" />
-                ) : link.platform.toLowerCase() === 'twitter' ? (
-                  <Twitter className="w-4 h-4 hover:text-[#1DA1F2]" />
-                ) : (
-                  <Mail className="w-4 h-4 hover:text-[#1D70B8]" />
-                )}
-              </a>
-            ))}
-          </div>
-        )}
       </div>
     );
   }
@@ -116,16 +148,12 @@ export const TeamMemberCard: React.FC<TeamMemberCardProps> = ({
           </span>
         </div>
 
-        <h3 className="text-lg font-medium text-slate-800 mb-2 tracking-tight">
+        <h3 className="text-lg font-medium text-slate-800 tracking-tight">
           [Official Member Name]
         </h3>
-
-        <p className="text-xs text-slate-500 font-mono bg-slate-50/80 p-3 rounded-xl border border-dashed border-slate-200 leading-relaxed mb-4">
-          [Position title, credentials & brief biography will be placed here.]
-        </p>
       </div>
 
-      <div className="pt-3 border-t border-slate-100/80 flex items-center justify-between text-[11px] text-slate-400 font-mono">
+      <div className="pt-3 mt-4 border-t border-slate-100/80 flex items-center justify-between text-[11px] text-slate-400 font-mono">
         <span>Verified Profile Slot</span>
         <span>KP, Pakistan</span>
       </div>
