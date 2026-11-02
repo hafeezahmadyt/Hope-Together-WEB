@@ -17,8 +17,11 @@ import { EmptyState } from '../../components/admin/EmptyState';
 import { StatusBadge } from '../../components/admin/StatusBadge';
 import { ConfirmModal } from '../../components/admin/ConfirmModal';
 import { Toast, ToastMessage } from '../../components/admin/Toast';
+import { GitHubSyncBar } from '../../components/admin/GitHubSyncBar';
+import { GitHubSyncModal } from '../../components/admin/GitHubSyncModal';
 import { partnerService } from '../../services/partnerService';
 import { activityService } from '../../services/activityService';
+import { githubSyncService } from '../../services/githubSyncService';
 import { AdminPartner, PARTNER_CATEGORIES } from '../../types/admin';
 
 export const AdminPartnersPage: React.FC = () => {
@@ -35,6 +38,10 @@ export const AdminPartnersPage: React.FC = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [isReadingLogo, setIsReadingLogo] = useState(false);
   const [toast, setToast] = useState<ToastMessage | null>(null);
+
+  // GitHub Auto-Deploy / Sync State
+  const [isSyncModalOpen, setIsSyncModalOpen] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
 
   // Form State
   const [formData, setFormData] = useState({
@@ -114,15 +121,28 @@ export const AdminPartnersPage: React.FC = () => {
     if (!validateForm()) return;
 
     setIsSaving(true);
+    const isGithubConnected = githubSyncService.isConfigured();
     try {
       if (editingPartner) {
         await partnerService.updatePartner(editingPartner.id, formData);
         await activityService.logActivity('updated', 'Partner', formData.name);
-        setToast({ id: String(Date.now()), type: 'success', text: `Updated "${formData.name}" successfully.` });
+        setToast({
+          id: String(Date.now()),
+          type: 'success',
+          text: isGithubConnected
+            ? `Updated "${formData.name}" & uploaded logo to GitHub! Cloudflare Pages will deploy shortly.`
+            : `Updated "${formData.name}". Connect GitHub to auto-deploy to live site.`,
+        });
       } else {
         await partnerService.createPartner(formData);
         await activityService.logActivity('added', 'Partner', formData.name);
-        setToast({ id: String(Date.now()), type: 'success', text: `Added "${formData.name}" successfully.` });
+        setToast({
+          id: String(Date.now()),
+          type: 'success',
+          text: isGithubConnected
+            ? `Added "${formData.name}" & uploaded logo to GitHub! Cloudflare Pages will deploy shortly.`
+            : `Added "${formData.name}". Connect GitHub to auto-deploy to live site.`,
+        });
       }
       setIsFormOpen(false);
       loadPartners();
@@ -130,6 +150,39 @@ export const AdminPartnersPage: React.FC = () => {
       setToast({ id: String(Date.now()), type: 'error', text: 'Failed to save partner.' });
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handleManualSync = async () => {
+    if (!githubSyncService.isConfigured()) {
+      setIsSyncModalOpen(true);
+      return;
+    }
+    setIsSyncing(true);
+    try {
+      const res = await partnerService.syncToGithub();
+      if (res.success) {
+        setToast({
+          id: String(Date.now()),
+          type: 'success',
+          text: `Successfully synced ${res.deployedCount} partners & logos to GitHub! Cloudflare Pages build triggered.`,
+        });
+        loadPartners();
+      } else {
+        setToast({
+          id: String(Date.now()),
+          type: 'error',
+          text: `GitHub sync error: ${res.error}`,
+        });
+      }
+    } catch (err: any) {
+      setToast({
+        id: String(Date.now()),
+        type: 'error',
+        text: err?.message || 'Failed to sync with GitHub.',
+      });
+    } finally {
+      setIsSyncing(false);
     }
   };
 
@@ -188,6 +241,15 @@ export const AdminPartnersPage: React.FC = () => {
           onClick: handleOpenCreate,
           icon: Plus,
         }}
+      />
+
+      {/* GitHub Auto-Deploy / Cloudflare Sync Bar */}
+      <GitHubSyncBar
+        resourceName="Partners"
+        folderPath="public/assets/partners/"
+        isSyncing={isSyncing}
+        onSync={handleManualSync}
+        onOpenSettings={() => setIsSyncModalOpen(true)}
       />
 
       <SearchFilterBar
@@ -531,6 +593,19 @@ export const AdminPartnersPage: React.FC = () => {
         isLoading={isSaving}
         onConfirm={handleDelete}
         onCancel={() => setDeletingPartner(null)}
+      />
+
+      {/* GitHub Sync Modal */}
+      <GitHubSyncModal
+        isOpen={isSyncModalOpen}
+        onClose={() => setIsSyncModalOpen(false)}
+        onSaved={() => {
+          setToast({
+            id: String(Date.now()),
+            type: 'success',
+            text: 'GitHub Auto-Deploy settings saved successfully!',
+          });
+        }}
       />
     </div>
   );

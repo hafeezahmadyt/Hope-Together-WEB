@@ -24,4 +24,7 @@ Thumbs.db
 .agent/
 .agents/
 
+# Local raw asset folders
+Partners logos/
+
 stitch_hope_together_organization_portal (2)/

@@ -11,6 +11,7 @@ import {
   X,
   Eye,
   EyeOff,
+  Image as ImageIcon,
 } from 'lucide-react';
 import { SEO } from '../../components/SEO';
 import { AdminPageHeader } from '../../components/admin/AdminPageHeader';
@@ -19,8 +20,11 @@ import { EmptyState } from '../../components/admin/EmptyState';
 import { StatusBadge } from '../../components/admin/StatusBadge';
 import { ConfirmModal } from '../../components/admin/ConfirmModal';
 import { Toast, ToastMessage } from '../../components/admin/Toast';
+import { GitHubSyncBar } from '../../components/admin/GitHubSyncBar';
+import { GitHubSyncModal } from '../../components/admin/GitHubSyncModal';
 import { eventService } from '../../services/eventService';
 import { activityService } from '../../services/activityService';
+import { githubSyncService } from '../../services/githubSyncService';
 import { AdminEvent, ContentStatus } from '../../types/admin';
 
 export const AdminEventsPage: React.FC = () => {
@@ -35,7 +39,12 @@ export const AdminEventsPage: React.FC = () => {
   const [editingEvent, setEditingEvent] = useState<AdminEvent | null>(null);
   const [deletingEvent, setDeletingEvent] = useState<AdminEvent | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [isReadingCover, setIsReadingCover] = useState(false);
   const [toast, setToast] = useState<ToastMessage | null>(null);
+
+  // GitHub Auto-Deploy / Sync State
+  const [isSyncModalOpen, setIsSyncModalOpen] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
 
   // Form State
   const [formData, setFormData] = useState({
@@ -135,15 +144,28 @@ export const AdminEventsPage: React.FC = () => {
     if (!validateForm()) return;
 
     setIsSaving(true);
+    const isGithubConnected = githubSyncService.isConfigured();
     try {
       if (editingEvent) {
         await eventService.updateEvent(editingEvent.id, formData);
         await activityService.logActivity('updated', 'Event', formData.title);
-        setToast({ id: String(Date.now()), type: 'success', text: `Updated "${formData.title}".` });
+        setToast({
+          id: String(Date.now()),
+          type: 'success',
+          text: isGithubConnected
+            ? `Updated "${formData.title}" & uploaded cover to GitHub! Cloudflare Pages will deploy shortly.`
+            : `Updated "${formData.title}". Connect GitHub to auto-deploy to live site.`,
+        });
       } else {
         await eventService.createEvent(formData);
         await activityService.logActivity('created', 'Event', formData.title);
-        setToast({ id: String(Date.now()), type: 'success', text: `Created "${formData.title}".` });
+        setToast({
+          id: String(Date.now()),
+          type: 'success',
+          text: isGithubConnected
+            ? `Created "${formData.title}" & uploaded cover to GitHub! Cloudflare Pages will deploy shortly.`
+            : `Created "${formData.title}". Connect GitHub to auto-deploy to live site.`,
+        });
       }
       setIsFormOpen(false);
       loadEvents();
@@ -151,6 +173,57 @@ export const AdminEventsPage: React.FC = () => {
       setToast({ id: String(Date.now()), type: 'error', text: 'Failed to save event.' });
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handleCoverFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setIsReadingCover(true);
+      const reader = new FileReader();
+      reader.onload = () => {
+        if (typeof reader.result === 'string') {
+          setFormData((prev) => ({ ...prev, coverImageUrl: reader.result as string }));
+        }
+        setIsReadingCover(false);
+      };
+      reader.onerror = () => {
+        setIsReadingCover(false);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleManualSync = async () => {
+    if (!githubSyncService.isConfigured()) {
+      setIsSyncModalOpen(true);
+      return;
+    }
+    setIsSyncing(true);
+    try {
+      const res = await eventService.syncToGithub();
+      if (res.success) {
+        setToast({
+          id: String(Date.now()),
+          type: 'success',
+          text: `Successfully synced ${res.deployedCount} events & covers to GitHub! Cloudflare Pages build triggered.`,
+        });
+        loadEvents();
+      } else {
+        setToast({
+          id: String(Date.now()),
+          type: 'error',
+          text: `GitHub sync error: ${res.error}`,
+        });
+      }
+    } catch (err: any) {
+      setToast({
+        id: String(Date.now()),
+        type: 'error',
+        text: err?.message || 'Failed to sync with GitHub.',
+      });
+    } finally {
+      setIsSyncing(false);
     }
   };
 
@@ -207,6 +280,15 @@ export const AdminEventsPage: React.FC = () => {
           onClick: handleOpenCreate,
           icon: Plus,
         }}
+      />
+
+      {/* GitHub Auto-Deploy / Cloudflare Sync Bar */}
+      <GitHubSyncBar
+        resourceName="Events"
+        folderPath="public/assets/events/"
+        isSyncing={isSyncing}
+        onSync={handleManualSync}
+        onOpenSettings={() => setIsSyncModalOpen(true)}
       />
 
       <SearchFilterBar
@@ -482,6 +564,37 @@ export const AdminEventsPage: React.FC = () => {
                 />
               </div>
 
+              {/* Event Cover Image / Flyer */}
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+                  Event Cover Image / Flyer
+                </label>
+                <div className="flex items-center gap-4 p-3.5 rounded-2xl bg-slate-50/70 border border-slate-200">
+                  <div className="w-16 h-12 rounded-xl bg-white border border-slate-200 flex items-center justify-center overflow-hidden flex-shrink-0">
+                    {formData.coverImageUrl ? (
+                      <img src={formData.coverImageUrl} alt="Preview" className="w-full h-full object-cover" />
+                    ) : (
+                      <ImageIcon className="w-5 h-5 text-slate-400" />
+                    )}
+                  </div>
+                  <div className="flex-1 space-y-1.5">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleCoverFileChange}
+                      className="text-xs text-slate-500 file:mr-2.5 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-medium file:bg-white file:text-slate-700 file:shadow-2xs file:cursor-pointer"
+                    />
+                    <input
+                      type="text"
+                      value={formData.coverImageUrl}
+                      onChange={(e) => setFormData({ ...formData, coverImageUrl: e.target.value })}
+                      placeholder="Or paste image URL (e.g. /assets/events/...)"
+                      className="w-full px-2.5 py-1 text-xs rounded-lg border border-slate-200 bg-white"
+                    />
+                  </div>
+                </div>
+              </div>
+
               <div className="pt-4 border-t border-slate-100 flex items-center justify-end gap-3">
                 <button
                   type="button"
@@ -493,11 +606,19 @@ export const AdminEventsPage: React.FC = () => {
                 </button>
                 <button
                   type="submit"
-                  disabled={isSaving}
-                  className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-slate-900 text-white text-xs font-semibold hover:bg-slate-800 transition-all shadow-xs cursor-pointer"
+                  disabled={isSaving || isReadingCover}
+                  className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-slate-900 text-white text-xs font-semibold hover:bg-slate-800 transition-all shadow-xs cursor-pointer disabled:opacity-60"
                 >
                   <Check className="w-4 h-4" />
-                  <span>{isSaving ? 'Saving...' : editingEvent ? 'Update Event' : 'Save Event'}</span>
+                  <span>
+                    {isSaving
+                      ? 'Saving...'
+                      : isReadingCover
+                      ? 'Reading image...'
+                      : editingEvent
+                      ? 'Update Event'
+                      : 'Save Event'}
+                  </span>
                 </button>
               </div>
             </form>
@@ -514,6 +635,19 @@ export const AdminEventsPage: React.FC = () => {
         isLoading={isSaving}
         onConfirm={handleDelete}
         onCancel={() => setDeletingEvent(null)}
+      />
+
+      {/* GitHub Sync Modal */}
+      <GitHubSyncModal
+        isOpen={isSyncModalOpen}
+        onClose={() => setIsSyncModalOpen(false)}
+        onSaved={() => {
+          setToast({
+            id: String(Date.now()),
+            type: 'success',
+            text: 'GitHub Auto-Deploy settings saved successfully!',
+          });
+        }}
       />
     </div>
   );

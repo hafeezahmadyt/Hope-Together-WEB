@@ -1,4 +1,4 @@
-import { AdminTeamMember } from '../types/admin';
+import { AdminTeamMember, AdminPartner, AdminEvent } from '../types/admin';
 
 const GITHUB_TOKEN_KEY = 'hope_together_github_token';
 const GITHUB_OWNER_KEY = 'hope_together_github_owner';
@@ -27,13 +27,34 @@ function utf8ToBase64(str: string): string {
   return btoa(binary);
 }
 
-export function slugifyMemberName(name: string): string {
-  const clean = name
+export function slugify(text: string): string {
+  const clean = text
     .toLowerCase()
     .trim()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '');
-  return clean || `member-${Date.now()}`;
+  return clean || `item-${Date.now()}`;
+}
+
+export function slugifyMemberName(name: string): string {
+  return slugify(name);
+}
+
+function extractBase64AndExt(dataUrlOrBase64: string, defaultExt = 'jpg'): { base64: string; ext: string } {
+  const match = dataUrlOrBase64.match(/^data:image\/([a-zA-Z0-9+.-]+);base64,(.+)$/s);
+  if (match) {
+    let mime = match[1].toLowerCase();
+    if (mime === 'jpeg') mime = 'jpg';
+    if (mime.includes('svg')) mime = 'svg';
+    return {
+      ext: mime,
+      base64: match[2].trim(),
+    };
+  }
+  return {
+    ext: defaultExt,
+    base64: dataUrlOrBase64.replace(/^data:image\/[a-z0-9+.-]+;base64,/i, '').trim(),
+  };
 }
 
 export const githubSyncService = {
@@ -64,6 +85,10 @@ export const githubSyncService = {
       if (settings.repo !== undefined) localStorage.setItem(GITHUB_REPO_KEY, settings.repo.trim());
       if (settings.branch !== undefined) localStorage.setItem(GITHUB_BRANCH_KEY, settings.branch.trim());
       if (settings.autoSync !== undefined) localStorage.setItem(GITHUB_AUTOSYNC_KEY, String(settings.autoSync));
+
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new Event('hope_together_github_settings_changed'));
+      }
     } catch {
       // Ignore
     }
@@ -188,33 +213,79 @@ export const githubSyncService = {
     }
   },
 
+  /**
+   * Upload an asset to a specific folder in GitHub (team, partners, events).
+   */
+  async uploadAsset(
+    folder: 'team' | 'partners' | 'events',
+    titleOrName: string,
+    dataUrlOrBase64: string,
+    defaultExt = 'jpg'
+  ): Promise<{ success: boolean; url: string; error?: string }> {
+    const slug = slugify(titleOrName);
+    const { base64, ext } = extractBase64AndExt(dataUrlOrBase64, defaultExt);
+
+    if (!base64) {
+      return { success: false, url: dataUrlOrBase64, error: 'Invalid base64 asset data' };
+    }
+
+    const filename = `${slug}.${ext}`;
+    const repoPath = `public/assets/${folder}/${filename}`;
+    const publicUrl = `/assets/${folder}/${filename}`;
+
+    const res = await this.commitFile(
+      repoPath,
+      base64,
+      `CMS: Upload structured ${folder} asset for "${titleOrName}"`
+    );
+
+    if (!res.success) {
+      return { success: false, url: dataUrlOrBase64, error: res.error };
+    }
+
+    return { success: true, url: publicUrl };
+  },
+
+  // Team Photo Upload
   async uploadPhoto(
     memberName: string,
     dataUrlOrBase64: string
   ): Promise<{ success: boolean; photoUrl: string; error?: string }> {
-    const slug = slugifyMemberName(memberName);
-    const filename = `${slug}.jpg`;
-    const repoPath = `public/assets/team/${filename}`;
-    const publicUrl = `/assets/team/${filename}`;
-
-    const rawBase64 = dataUrlOrBase64.replace(/^data:image\/[a-z]+;base64,/, '').trim();
-    if (!rawBase64) {
-      return { success: false, photoUrl: dataUrlOrBase64, error: 'Invalid base64 photo data' };
-    }
-
-    const res = await this.commitFile(
-      repoPath,
-      rawBase64,
-      `CMS: Upload structured team photo for ${memberName}`
-    );
-
-    if (!res.success) {
-      return { success: false, photoUrl: dataUrlOrBase64, error: res.error };
-    }
-
-    return { success: true, photoUrl: publicUrl };
+    const res = await this.uploadAsset('team', memberName, dataUrlOrBase64, 'jpg');
+    return {
+      success: res.success,
+      photoUrl: res.url,
+      error: res.error,
+    };
   },
 
+  // Partner Logo Upload
+  async uploadPartnerLogo(
+    partnerName: string,
+    dataUrlOrBase64: string
+  ): Promise<{ success: boolean; logoUrl: string; error?: string }> {
+    const res = await this.uploadAsset('partners', partnerName, dataUrlOrBase64, 'png');
+    return {
+      success: res.success,
+      logoUrl: res.url,
+      error: res.error,
+    };
+  },
+
+  // Event Cover / Flyer Upload
+  async uploadEventImage(
+    eventTitle: string,
+    dataUrlOrBase64: string
+  ): Promise<{ success: boolean; coverImageUrl: string; error?: string }> {
+    const res = await this.uploadAsset('events', eventTitle, dataUrlOrBase64, 'jpg');
+    return {
+      success: res.success,
+      coverImageUrl: res.url,
+      error: res.error,
+    };
+  },
+
+  // Full Team Sync
   async syncFullTeamToGithub(
     members: AdminTeamMember[]
   ): Promise<{ success: boolean; deployedCount: number; error?: string }> {
@@ -227,7 +298,6 @@ export const githubSyncService = {
       const processedMembers: AdminTeamMember[] = [];
       let uploadedPhotos = 0;
 
-      // 1. Process and upload any base64 images to public/assets/team/
       for (const m of members) {
         let finalPhotoUrl = m.photoUrl;
 
@@ -245,7 +315,6 @@ export const githubSyncService = {
         });
       }
 
-      // 2. Commit updated mockTeam.ts to GitHub
       const fileContent = `import { AdminTeamMember } from '../../types/admin';\n\nexport const initialMockTeamMembers: AdminTeamMember[] = ${JSON.stringify(
         processedMembers,
         null,
@@ -264,6 +333,112 @@ export const githubSyncService = {
       }
 
       return { success: true, deployedCount: processedMembers.length };
+    } catch (err: any) {
+      return { success: false, deployedCount: 0, error: err?.message || 'Sync failed.' };
+    }
+  },
+
+  // Full Partners Sync
+  async syncFullPartnersToGithub(
+    partners: AdminPartner[]
+  ): Promise<{ success: boolean; deployedCount: number; error?: string }> {
+    const s = this.getSettings();
+    if (!s.token) {
+      return { success: false, deployedCount: 0, error: 'GitHub token not configured.' };
+    }
+
+    try {
+      const processedPartners: AdminPartner[] = [];
+      let uploadedLogos = 0;
+
+      for (const p of partners) {
+        let finalLogoUrl = p.logoUrl;
+
+        if (finalLogoUrl && finalLogoUrl.startsWith('data:image/')) {
+          const uploadRes = await this.uploadPartnerLogo(p.name, finalLogoUrl);
+          if (uploadRes.success) {
+            finalLogoUrl = uploadRes.logoUrl;
+            uploadedLogos++;
+          }
+        }
+
+        processedPartners.push({
+          ...p,
+          logoUrl: finalLogoUrl,
+        });
+      }
+
+      const fileContent = `import { AdminPartner } from '../../types/admin';\n\nexport const initialMockPartners: AdminPartner[] = ${JSON.stringify(
+        processedPartners,
+        null,
+        2
+      )};\n`;
+
+      const base64Code = utf8ToBase64(fileContent);
+      const commitRes = await this.commitFile(
+        'src/data/mock/mockPartners.ts',
+        base64Code,
+        `CMS: Update official partners roster (${processedPartners.length} partners, ${uploadedLogos} logos uploaded)`
+      );
+
+      if (!commitRes.success) {
+        return { success: false, deployedCount: 0, error: commitRes.error };
+      }
+
+      return { success: true, deployedCount: processedPartners.length };
+    } catch (err: any) {
+      return { success: false, deployedCount: 0, error: err?.message || 'Sync failed.' };
+    }
+  },
+
+  // Full Events Sync
+  async syncFullEventsToGithub(
+    events: AdminEvent[]
+  ): Promise<{ success: boolean; deployedCount: number; error?: string }> {
+    const s = this.getSettings();
+    if (!s.token) {
+      return { success: false, deployedCount: 0, error: 'GitHub token not configured.' };
+    }
+
+    try {
+      const processedEvents: AdminEvent[] = [];
+      let uploadedImages = 0;
+
+      for (const e of events) {
+        let finalCoverUrl = e.coverImageUrl;
+
+        if (finalCoverUrl && finalCoverUrl.startsWith('data:image/')) {
+          const uploadRes = await this.uploadEventImage(e.title, finalCoverUrl);
+          if (uploadRes.success) {
+            finalCoverUrl = uploadRes.coverImageUrl;
+            uploadedImages++;
+          }
+        }
+
+        processedEvents.push({
+          ...e,
+          coverImageUrl: finalCoverUrl,
+        });
+      }
+
+      const fileContent = `import { AdminEvent } from '../../types/admin';\n\nexport const initialMockEvents: AdminEvent[] = ${JSON.stringify(
+        processedEvents,
+        null,
+        2
+      )};\n`;
+
+      const base64Code = utf8ToBase64(fileContent);
+      const commitRes = await this.commitFile(
+        'src/data/mock/mockEvents.ts',
+        base64Code,
+        `CMS: Update official events roster (${processedEvents.length} events, ${uploadedImages} covers uploaded)`
+      );
+
+      if (!commitRes.success) {
+        return { success: false, deployedCount: 0, error: commitRes.error };
+      }
+
+      return { success: true, deployedCount: processedEvents.length };
     } catch (err: any) {
       return { success: false, deployedCount: 0, error: err?.message || 'Sync failed.' };
     }
