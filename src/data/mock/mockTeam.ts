@@ -154,5 +154,19 @@ export const initialMockTeamMembers: AdminTeamMember[] = [
     "displayOrder": 11,
     "isActive": true,
     "id": "team-1793655162434"
+  },
+  {
+    "name": "Romana Fayaz",
+    "position": "Outreach and Partnerships Co-ordinator",
+    "bio": "Romana Fayaz is a passionate law student with a strong interest in human rights, women's empowerment, and child protection. She is committed to promoting gender equality, combating child labour, and advocating for social justice. Through legal awareness and community engagement, she aims to protect vulnerable communities, amplify marginalized voices, and contribute to a more just and inclusive society.",
+    "category": "Executive Body",
+    "photoUrl": "/assets/team/romana-fayaz.jpg",
+    "email": "",
+    "linkedinUrl": "",
+    "facebookUrl": "",
+    "instagramUrl": "",
+    "displayOrder": 12,
+    "isActive": true,
+    "id": "team-1793655367453"
   }
 ];
