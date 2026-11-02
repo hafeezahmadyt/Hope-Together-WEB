@@ -112,5 +112,19 @@ export const initialMockTeamMembers: AdminTeamMember[] = [
     "displayOrder": 8,
     "isActive": true,
     "id": "team-1793654677721"
+  },
+  {
+    "name": "Mehak Khattak",
+    "position": "Deputy Director Women forum",
+    "bio": "Mehak Khattak is a Political Science graduate passionate about youth leadership, social impact, and community development. With an academic background in governance, international relations, and public policy, she is committed to empowering young people through awareness, dialogue, and collective action. She believes in the power of youth to drive positive change and is dedicated to promoting leadership, inclusion, and stronger communities.",
+    "category": "Executive Body",
+    "photoUrl": "/assets/team/mehak-khattak.jpg",
+    "email": "",
+    "linkedinUrl": "",
+    "facebookUrl": "",
+    "instagramUrl": "",
+    "displayOrder": 9,
+    "isActive": true,
+    "id": "team-1793654851516"
   }
 ];
