@@ -98,5 +98,19 @@ export const initialMockTeamMembers: AdminTeamMember[] = [
     "displayOrder": 7,
     "isActive": true,
     "id": "team-1793654414954"
+  },
+  {
+    "name": "Afeefa Akram",
+    "position": "Director Women Forum",
+    "bio": "Afeefa Akram is a passionate law student committed to women's education, climate action, and social welfare. She has contributed to UNICEF-supported initiatives addressing child marriage and promoting girls' education. With experience in public speaking, advocacy, and project management, she actively engages youth in community initiatives and works to promote justice, equality, and positive social change.",
+    "category": "Executive Body",
+    "photoUrl": "/assets/team/afeefa-akram.jpg",
+    "email": "",
+    "linkedinUrl": "",
+    "facebookUrl": "",
+    "instagramUrl": "",
+    "displayOrder": 8,
+    "isActive": true,
+    "id": "team-1793654677721"
   }
 ];
