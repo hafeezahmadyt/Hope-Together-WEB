@@ -8,24 +8,47 @@ const CURRENT_VERSION = 'v2_official_partners';
 
 function getStoredPartners(): AdminPartner[] {
   try {
-    const version = typeof localStorage !== 'undefined' ? localStorage.getItem(DATA_VERSION_KEY) : null;
     const raw = typeof localStorage !== 'undefined' ? localStorage.getItem(STORAGE_KEY) : null;
+    if (raw) {
+      const parsed: AdminPartner[] = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        // Filter out any legacy dummy samples
+        const nonLegacy = parsed.filter(
+          (p) => !p.id.startsWith('partner-1') && !p.name.includes('Sample')
+        );
 
-    // Auto-migrate or initialize to official partners dataset if version is missing or old
-    if (version !== CURRENT_VERSION || !raw) {
-      if (typeof localStorage !== 'undefined') {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(initialMockPartners));
-        localStorage.setItem(DATA_VERSION_KEY, CURRENT_VERSION);
+        const storedIds = new Set(nonLegacy.map((p) => p.id || p.name));
+        const missingOfficial = initialMockPartners.filter((p) => !storedIds.has(p.id || p.name));
+
+        let needsUpdate = missingOfficial.length > 0 || nonLegacy.length !== parsed.length;
+        const merged = nonLegacy.map((p) => {
+          const official = initialMockPartners.find((o) => o.id === p.id || o.name === p.name);
+          if (official && (!p.logoUrl || p.logoUrl.startsWith('data:image/') || p.logoUrl !== official.logoUrl)) {
+            needsUpdate = true;
+            return { ...p, logoUrl: official.logoUrl };
+          }
+          return p;
+        });
+
+        const finalPartners = [...merged, ...missingOfficial];
+
+        if (needsUpdate && typeof localStorage !== 'undefined') {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(finalPartners));
+          localStorage.setItem(DATA_VERSION_KEY, CURRENT_VERSION);
+        }
+
+        return finalPartners;
       }
-      return initialMockPartners;
-    }
-
-    const parsed = JSON.parse(raw);
-    if (Array.isArray(parsed) && parsed.length > 0) {
-      return parsed;
     }
   } catch {
     // Fallback
+  }
+
+  if (typeof localStorage !== 'undefined') {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(initialMockPartners));
+      localStorage.setItem(DATA_VERSION_KEY, CURRENT_VERSION);
+    } catch {}
   }
   return initialMockPartners;
 }

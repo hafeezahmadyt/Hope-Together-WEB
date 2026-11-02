@@ -9,7 +9,14 @@ interface PartnerItemProps {
 }
 
 export const PartnerItem: React.FC<PartnerItemProps> = ({ partner, isDuplicate }) => {
-  const logo = ('logo' in partner ? partner.logo : undefined) || ('logoUrl' in partner ? partner.logoUrl : undefined);
+  const initialLogo = ('logo' in partner ? partner.logo : undefined) || ('logoUrl' in partner ? partner.logoUrl : undefined);
+  const [logoSrc, setLogoSrc] = React.useState<string | undefined>(initialLogo);
+  const [imgError, setImgError] = React.useState(false);
+
+  React.useEffect(() => {
+    setLogoSrc(initialLogo);
+    setImgError(false);
+  }, [initialLogo]);
 
   // Select an appropriate subtle icon placeholder based on category or default
   const renderIconPlaceholder = () => {
@@ -50,13 +57,22 @@ export const PartnerItem: React.FC<PartnerItemProps> = ({ partner, isDuplicate }
   const Content = (
     <div className="p-6 sm:p-7 rounded-3xl bg-white border border-slate-200/80 shadow-[0_2px_8px_rgba(0,0,0,0.03)] hover:shadow-xl hover:border-slate-300 hover:-translate-y-1.5 transition-all duration-300 flex flex-col items-center justify-between text-center group h-full min-h-[200px] sm:min-h-[220px]">
       <div className="w-full flex-1 flex items-center justify-center">
-        {logo ? (
+        {logoSrc && !imgError ? (
           <div className="w-full flex items-center justify-center h-24 sm:h-28 px-2">
             <img
-              src={logo}
+              src={logoSrc}
               alt={partner.name}
               className="max-h-full max-w-full w-auto object-contain transition-transform duration-300 ease-out group-hover:scale-105"
               loading="lazy"
+              onError={() => {
+                if (logoSrc.endsWith('.png')) {
+                  setLogoSrc(logoSrc.replace(/\.png$/, '.jpg'));
+                } else if (logoSrc.endsWith('.jpg')) {
+                  setLogoSrc(logoSrc.replace(/\.jpg$/, '.png'));
+                } else {
+                  setImgError(true);
+                }
+              }}
             />
           </div>
         ) : (

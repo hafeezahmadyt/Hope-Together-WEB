@@ -8,24 +8,44 @@ const CURRENT_VERSION = 'v2_official_team';
 
 function getStoredMembers(): AdminTeamMember[] {
   try {
-    const version = typeof localStorage !== 'undefined' ? localStorage.getItem(DATA_VERSION_KEY) : null;
     const raw = typeof localStorage !== 'undefined' ? localStorage.getItem(STORAGE_KEY) : null;
+    if (raw) {
+      const parsed: AdminTeamMember[] = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        // Find any official members from repository build missing in stored cache
+        const storedIds = new Set(parsed.map((m) => m.id || m.name));
+        const missingOfficial = initialMockTeamMembers.filter((m) => !storedIds.has(m.id || m.name));
 
-    // Auto-migrate or initialize to official team dataset if version is missing or old
-    if (version !== CURRENT_VERSION || !raw) {
-      if (typeof localStorage !== 'undefined') {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(initialMockTeamMembers));
-        localStorage.setItem(DATA_VERSION_KEY, CURRENT_VERSION);
+        // Check if any stored member has missing/outdated photoUrl from official build
+        let needsUpdate = missingOfficial.length > 0;
+        const merged = parsed.map((m) => {
+          const official = initialMockTeamMembers.find((o) => o.id === m.id || o.name === m.name);
+          if (official && (!m.photoUrl || m.photoUrl.startsWith('data:image/') || m.photoUrl !== official.photoUrl)) {
+            needsUpdate = true;
+            return { ...m, photoUrl: official.photoUrl };
+          }
+          return m;
+        });
+
+        const finalMembers = [...merged, ...missingOfficial];
+
+        if (needsUpdate && typeof localStorage !== 'undefined') {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(finalMembers));
+          localStorage.setItem(DATA_VERSION_KEY, CURRENT_VERSION);
+        }
+
+        return finalMembers;
       }
-      return initialMockTeamMembers;
-    }
-
-    const parsed = JSON.parse(raw);
-    if (Array.isArray(parsed) && parsed.length > 0) {
-      return parsed;
     }
   } catch {
     // Fallback
+  }
+
+  if (typeof localStorage !== 'undefined') {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(initialMockTeamMembers));
+      localStorage.setItem(DATA_VERSION_KEY, CURRENT_VERSION);
+    } catch {}
   }
   return initialMockTeamMembers;
 }

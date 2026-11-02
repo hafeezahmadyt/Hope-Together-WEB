@@ -8,24 +8,42 @@ const CURRENT_VERSION = 'v2_official_events';
 
 function getStoredEvents(): AdminEvent[] {
   try {
-    const version = typeof localStorage !== 'undefined' ? localStorage.getItem(DATA_VERSION_KEY) : null;
     const raw = typeof localStorage !== 'undefined' ? localStorage.getItem(STORAGE_KEY) : null;
+    if (raw) {
+      const parsed: AdminEvent[] = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        const storedIds = new Set(parsed.map((e) => e.id || e.title));
+        const missingOfficial = initialMockEvents.filter((e) => !storedIds.has(e.id || e.title));
 
-    // Auto-migrate or initialize to official events dataset if version is missing or old
-    if (version !== CURRENT_VERSION || !raw) {
-      if (typeof localStorage !== 'undefined') {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(initialMockEvents));
-        localStorage.setItem(DATA_VERSION_KEY, CURRENT_VERSION);
+        let needsUpdate = missingOfficial.length > 0;
+        const merged = parsed.map((e) => {
+          const official = initialMockEvents.find((o) => o.id === e.id || o.title === e.title);
+          if (official && (!e.coverImageUrl || e.coverImageUrl.startsWith('data:image/') || e.coverImageUrl !== official.coverImageUrl)) {
+            needsUpdate = true;
+            return { ...e, coverImageUrl: official.coverImageUrl };
+          }
+          return e;
+        });
+
+        const finalEvents = [...merged, ...missingOfficial];
+
+        if (needsUpdate && typeof localStorage !== 'undefined') {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(finalEvents));
+          localStorage.setItem(DATA_VERSION_KEY, CURRENT_VERSION);
+        }
+
+        return finalEvents;
       }
-      return initialMockEvents;
-    }
-
-    const parsed = JSON.parse(raw);
-    if (Array.isArray(parsed) && parsed.length > 0) {
-      return parsed;
     }
   } catch {
     // Fallback
+  }
+
+  if (typeof localStorage !== 'undefined') {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(initialMockEvents));
+      localStorage.setItem(DATA_VERSION_KEY, CURRENT_VERSION);
+    } catch {}
   }
   return initialMockEvents;
 }

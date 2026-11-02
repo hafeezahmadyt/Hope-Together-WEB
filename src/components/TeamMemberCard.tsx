@@ -18,18 +18,27 @@ export const TeamMemberCard: React.FC<TeamMemberCardProps> = ({
 }) => {
   const [isTouchActive, setIsTouchActive] = useState(false);
 
+  const adminMember = member as AdminTeamMember | undefined;
+  const initialPhoto = adminMember?.photoUrl || (member as TeamMember | undefined)?.image;
+  const [imgSrc, setImgSrc] = useState<string | undefined>(initialPhoto);
+  const [imgError, setImgError] = useState(false);
+
+  React.useEffect(() => {
+    setImgSrc(initialPhoto);
+    setImgError(false);
+  }, [initialPhoto]);
+
   if (member) {
-    const adminMember = member as AdminTeamMember;
-    const photo = adminMember.photoUrl || (member as TeamMember).image;
+    const photo = imgSrc;
 
     // Build social links array
     const socialList = (member as TeamMember).socialLinks && (member as TeamMember).socialLinks!.length > 0
       ? (member as TeamMember).socialLinks!
       : [
-          adminMember.linkedinUrl ? { platform: 'linkedin', url: adminMember.linkedinUrl } : null,
-          adminMember.instagramUrl ? { platform: 'instagram', url: adminMember.instagramUrl } : null,
-          adminMember.facebookUrl ? { platform: 'facebook', url: adminMember.facebookUrl } : null,
-          adminMember.email ? { platform: 'mail', url: `mailto:${adminMember.email}` } : null,
+          adminMember?.linkedinUrl ? { platform: 'linkedin', url: adminMember.linkedinUrl } : null,
+          adminMember?.instagramUrl ? { platform: 'instagram', url: adminMember.instagramUrl } : null,
+          adminMember?.facebookUrl ? { platform: 'facebook', url: adminMember.facebookUrl } : null,
+          adminMember?.email ? { platform: 'mail', url: `mailto:${adminMember.email}` } : null,
         ].filter(Boolean) as { platform: string; url: string }[];
 
     const hasAbout = Boolean(member.bio && member.bio.trim().length > 0);
@@ -42,11 +51,20 @@ export const TeamMemberCard: React.FC<TeamMemberCardProps> = ({
         <div>
           {/* Photograph Container: remains in place, untouched */}
           <div className="aspect-[4/3] rounded-2xl overflow-hidden bg-slate-100 mb-4 relative flex items-center justify-center">
-            {photo ? (
+            {photo && !imgError ? (
               <img
                 src={photo}
                 alt={member.name}
                 className="w-full h-full object-cover"
+                onError={() => {
+                  if (photo.endsWith('.jpg')) {
+                    setImgSrc(photo.replace(/\.jpg$/, '.png'));
+                  } else if (photo.endsWith('.png')) {
+                    setImgSrc(photo.replace(/\.png$/, '.jpg'));
+                  } else {
+                    setImgError(true);
+                  }
+                }}
               />
             ) : (
               <div className="flex flex-col items-center justify-center text-slate-400">
