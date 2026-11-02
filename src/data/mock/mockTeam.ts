@@ -70,5 +70,19 @@ export const initialMockTeamMembers: AdminTeamMember[] = [
     "displayOrder": 5,
     "isActive": true,
     "id": "team-1793354254730"
+  },
+  {
+    "name": "Musa Aurangzeb",
+    "position": "Information Secretary",
+    "bio": "Musa Aurengzeb is an International Relations student with a strong interest in global affairs, diplomacy, and peacebuilding. He has experience working with organizations focused on social development, community engagement, and youth initiatives. Through research, advocacy, and community work, he is committed to promoting youth participation, meaningful collaboration, and sustainable social development.",
+    "category": "Core Team",
+    "photoUrl": "/assets/team/musa-aurangzeb.jpg",
+    "email": "",
+    "linkedinUrl": "",
+    "facebookUrl": "",
+    "instagramUrl": "",
+    "displayOrder": 6,
+    "isActive": true,
+    "id": "team-1793652969584"
   }
 ];
