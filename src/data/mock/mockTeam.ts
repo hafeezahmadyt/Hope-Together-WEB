@@ -140,5 +140,19 @@ export const initialMockTeamMembers: AdminTeamMember[] = [
     "displayOrder": 10,
     "isActive": true,
     "id": "team-1793655044264"
+  },
+  {
+    "name": "Noman Zia",
+    "position": "Event Coordinator",
+    "bio": "Noman Zia is a Software Engineering student with a growing interest in artificial intelligence, machine learning, and research. Actively involved in academic, technical, and community initiatives, he brings experience in event organization, teamwork, and student leadership. He is passionate about using technology, collaboration, and creative problem-solving to empower others and create a positive impact in the community.",
+    "category": "Executive Body",
+    "photoUrl": "/assets/team/noman-zia.jpg",
+    "email": "",
+    "linkedinUrl": "",
+    "facebookUrl": "",
+    "instagramUrl": "",
+    "displayOrder": 11,
+    "isActive": true,
+    "id": "team-1793655162434"
   }
 ];
