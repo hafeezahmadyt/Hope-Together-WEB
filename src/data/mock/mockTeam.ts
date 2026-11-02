@@ -168,5 +168,19 @@ export const initialMockTeamMembers: AdminTeamMember[] = [
     "displayOrder": 12,
     "isActive": true,
     "id": "team-1793655367453"
+  },
+  {
+    "name": "Maavia Rizwan",
+    "position": "Social  Media Manager",
+    "bio": "Maavia Rizwan is a Computer Science student and tech enthusiast with a growing interest in machine learning, deep learning, and digital innovation. He has served as Management Lead at the Software Synergy Club and Event Coordinator at GDG Islamia College Peshawar, contributing to academic events, workshops, and community initiatives. As Social Media Manager at Hope Together Organization, he focuses on using digital platforms to raise awareness, encourage engagement, and create meaningful community impact.",
+    "category": "Executive Body",
+    "photoUrl": "/assets/team/maavia-rizwan.jpg",
+    "email": "",
+    "linkedinUrl": "",
+    "facebookUrl": "",
+    "instagramUrl": "",
+    "displayOrder": 13,
+    "isActive": true,
+    "id": "team-1793655463885"
   }
 ];
