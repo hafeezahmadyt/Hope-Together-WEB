@@ -126,5 +126,19 @@ export const initialMockTeamMembers: AdminTeamMember[] = [
     "displayOrder": 9,
     "isActive": true,
     "id": "team-1793654851516"
+  },
+  {
+    "name": "Umar Farooq",
+    "position": "Director Programs",
+    "bio": "Umar Farooq is a recent graduate of Islamia College Peshawar and serves as Director of Programs at Hope Together Organization. Passionate about youth engagement and community development, he focuses on program planning, coordination, and implementation. He is committed to creating meaningful opportunities for young people and driving positive social change through impactful initiatives.",
+    "category": "Executive Body",
+    "photoUrl": "/assets/team/umar-farooq.png",
+    "email": "",
+    "linkedinUrl": "",
+    "facebookUrl": "",
+    "instagramUrl": "",
+    "displayOrder": 10,
+    "isActive": true,
+    "id": "team-1793655044264"
   }
 ];
