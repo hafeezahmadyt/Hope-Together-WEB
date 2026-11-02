@@ -84,5 +84,19 @@ export const initialMockTeamMembers: AdminTeamMember[] = [
     "displayOrder": 6,
     "isActive": true,
     "id": "team-1793652969584"
+  },
+  {
+    "name": "Abdullah Bin Khalid",
+    "position": "Cabinet Advisor",
+    "bio": "Abdullah Bin Khalid is a Political Science student at the University of Peshawar with interests in democracy, media, and postcolonial studies. With over three years of experience working with NGOs, he has contributed to initiatives focused on literacy, interfaith harmony, digital ethics, tobacco control, and women's empowerment. He currently serves as President of the Political Science Debating Society and is actively involved in student leadership, research, and advocacy. A graduate of Aspire Institute's Leaders Program, he is passionate about civic engagement, critical thinking, and positive social change.",
+    "category": "Core Team",
+    "photoUrl": "/assets/team/abdullah-bin-khalid.jpg",
+    "email": "",
+    "linkedinUrl": "",
+    "facebookUrl": "",
+    "instagramUrl": "",
+    "displayOrder": 7,
+    "isActive": true,
+    "id": "team-1793654414954"
   }
 ];
