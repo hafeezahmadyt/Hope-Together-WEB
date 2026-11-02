@@ -251,7 +251,7 @@ export const githubSyncService = {
     memberName: string,
     dataUrlOrBase64: string
   ): Promise<{ success: boolean; photoUrl: string; error?: string }> {
-    const res = await this.uploadAsset('team', memberName, dataUrlOrBase64, 'jpg');
+    const res = await this.uploadAsset('team', memberName, dataUrlOrBase64, 'png');
     return {
       success: res.success,
       photoUrl: res.url,
@@ -272,15 +272,19 @@ export const githubSyncService = {
     };
   },
 
-  // Event Cover / Flyer Upload
+  // Event Cover / Gallery Image Upload (Supports up to 5 images)
   async uploadEventImage(
     eventTitle: string,
-    dataUrlOrBase64: string
-  ): Promise<{ success: boolean; coverImageUrl: string; error?: string }> {
-    const res = await this.uploadAsset('events', eventTitle, dataUrlOrBase64, 'jpg');
+    dataUrlOrBase64: string,
+    index?: number
+  ): Promise<{ success: boolean; coverImageUrl: string; url: string; error?: string }> {
+    const suffix = index !== undefined ? `-${index + 1}` : '';
+    const name = `${eventTitle}${suffix}`;
+    const res = await this.uploadAsset('events', name, dataUrlOrBase64, 'jpg');
     return {
       success: res.success,
       coverImageUrl: res.url,
+      url: res.url,
       error: res.error,
     };
   },
@@ -288,7 +292,7 @@ export const githubSyncService = {
   // Full Team Sync
   async syncFullTeamToGithub(
     members: AdminTeamMember[]
-  ): Promise<{ success: boolean; deployedCount: number; error?: string }> {
+  ): Promise<{ success: boolean; deployedCount: number; members?: AdminTeamMember[]; error?: string }> {
     const s = this.getSettings();
     if (!s.token) {
       return { success: false, deployedCount: 0, error: 'GitHub token not configured.' };
@@ -332,7 +336,7 @@ export const githubSyncService = {
         return { success: false, deployedCount: 0, error: commitRes.error };
       }
 
-      return { success: true, deployedCount: processedMembers.length };
+      return { success: true, deployedCount: processedMembers.length, members: processedMembers };
     } catch (err: any) {
       return { success: false, deployedCount: 0, error: err?.message || 'Sync failed.' };
     }
@@ -341,7 +345,7 @@ export const githubSyncService = {
   // Full Partners Sync
   async syncFullPartnersToGithub(
     partners: AdminPartner[]
-  ): Promise<{ success: boolean; deployedCount: number; error?: string }> {
+  ): Promise<{ success: boolean; deployedCount: number; partners?: AdminPartner[]; error?: string }> {
     const s = this.getSettings();
     if (!s.token) {
       return { success: false, deployedCount: 0, error: 'GitHub token not configured.' };
@@ -385,16 +389,16 @@ export const githubSyncService = {
         return { success: false, deployedCount: 0, error: commitRes.error };
       }
 
-      return { success: true, deployedCount: processedPartners.length };
+      return { success: true, deployedCount: processedPartners.length, partners: processedPartners };
     } catch (err: any) {
       return { success: false, deployedCount: 0, error: err?.message || 'Sync failed.' };
     }
   },
 
-  // Full Events Sync
+  // Full Events Sync (Supports up to 5 pictures per event)
   async syncFullEventsToGithub(
     events: AdminEvent[]
-  ): Promise<{ success: boolean; deployedCount: number; error?: string }> {
+  ): Promise<{ success: boolean; deployedCount: number; events?: AdminEvent[]; error?: string }> {
     const s = this.getSettings();
     if (!s.token) {
       return { success: false, deployedCount: 0, error: 'GitHub token not configured.' };
@@ -406,18 +410,34 @@ export const githubSyncService = {
 
       for (const e of events) {
         let finalCoverUrl = e.coverImageUrl;
+        let finalImages: string[] = [];
 
-        if (finalCoverUrl && finalCoverUrl.startsWith('data:image/')) {
-          const uploadRes = await this.uploadEventImage(e.title, finalCoverUrl);
-          if (uploadRes.success) {
-            finalCoverUrl = uploadRes.coverImageUrl;
-            uploadedImages++;
+        // Collect source images (either array or coverImageUrl)
+        const sourceImages = Array.isArray(e.images) && e.images.length > 0
+          ? e.images
+          : (e.coverImageUrl ? [e.coverImageUrl] : []);
+
+        // Process up to 5 pictures
+        for (let i = 0; i < Math.min(5, sourceImages.length); i++) {
+          let img = sourceImages[i];
+          if (img && img.startsWith('data:image/')) {
+            const uploadRes = await this.uploadEventImage(e.title, img, i);
+            if (uploadRes.success) {
+              img = uploadRes.url;
+              uploadedImages++;
+            }
           }
+          finalImages.push(img);
+        }
+
+        if (finalImages.length > 0) {
+          finalCoverUrl = finalImages[0];
         }
 
         processedEvents.push({
           ...e,
           coverImageUrl: finalCoverUrl,
+          images: finalImages,
         });
       }
 
@@ -431,14 +451,14 @@ export const githubSyncService = {
       const commitRes = await this.commitFile(
         'src/data/mock/mockEvents.ts',
         base64Code,
-        `CMS: Update official events roster (${processedEvents.length} events, ${uploadedImages} covers uploaded)`
+        `CMS: Update official events roster (${processedEvents.length} events, ${uploadedImages} photos uploaded)`
       );
 
       if (!commitRes.success) {
         return { success: false, deployedCount: 0, error: commitRes.error };
       }
 
-      return { success: true, deployedCount: processedEvents.length };
+      return { success: true, deployedCount: processedEvents.length, events: processedEvents };
     } catch (err: any) {
       return { success: false, deployedCount: 0, error: err?.message || 'Sync failed.' };
     }

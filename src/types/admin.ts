@@ -72,6 +72,7 @@ export interface AdminEvent {
   eventTime?: string;
   location: string;
   coverImageUrl?: string;
+  images?: string[];
   registrationUrl?: string;
   status: ContentStatus;
 }

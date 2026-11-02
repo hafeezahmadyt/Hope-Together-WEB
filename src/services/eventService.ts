@@ -4,7 +4,7 @@ import { githubSyncService } from './githubSyncService';
 
 const STORAGE_KEY = 'hope_together_cms_events';
 const DATA_VERSION_KEY = 'hope_together_events_version';
-const CURRENT_VERSION = 'v2_official_events';
+const CURRENT_VERSION = 'v3_five_photo_events';
 
 function getStoredEvents(): AdminEvent[] {
   try {
@@ -18,9 +18,31 @@ function getStoredEvents(): AdminEvent[] {
         let needsUpdate = missingOfficial.length > 0;
         const merged = parsed.map((e) => {
           const official = initialMockEvents.find((o) => o.id === e.id || o.title === e.title);
-          if (official && (!e.coverImageUrl || e.coverImageUrl.startsWith('data:image/') || e.coverImageUrl !== official.coverImageUrl)) {
+          if (official) {
+            let updated = { ...e };
+            // Ensure cover image is updated if local is base64 or missing
+            if (
+              official.coverImageUrl &&
+              (!e.coverImageUrl || e.coverImageUrl.startsWith('data:image/') || e.coverImageUrl !== official.coverImageUrl)
+            ) {
+              updated.coverImageUrl = official.coverImageUrl;
+              needsUpdate = true;
+            }
+            // Ensure images array is synced if official has images
+            if (official.images && official.images.length > 0) {
+              if (!e.images || e.images.length === 0 || JSON.stringify(e.images) !== JSON.stringify(official.images)) {
+                updated.images = official.images;
+                needsUpdate = true;
+              }
+            } else if (!updated.images && updated.coverImageUrl) {
+              updated.images = [updated.coverImageUrl];
+              needsUpdate = true;
+            }
+            return updated;
+          }
+          if (!e.images && e.coverImageUrl) {
             needsUpdate = true;
-            return { ...e, coverImageUrl: official.coverImageUrl };
+            return { ...e, images: [e.coverImageUrl] };
           }
           return e;
         });
@@ -36,7 +58,7 @@ function getStoredEvents(): AdminEvent[] {
       }
     }
   } catch {
-    // Fallback
+    // Fallback gracefully
   }
 
   if (typeof localStorage !== 'undefined') {
@@ -73,27 +95,20 @@ export const eventService = {
   },
 
   async createEvent(data: Omit<AdminEvent, 'id'>): Promise<AdminEvent> {
-    await new Promise((r) => setTimeout(r, 100));
+    await new Promise((r) => setTimeout(r, 80));
     const events = getStoredEvents();
 
     let finalData = { ...data };
 
-    // Auto-upload cover image to GitHub public/assets/events/ if configured and image is base64
-    if (
-      githubSyncService.isConfigured() &&
-      githubSyncService.getSettings().autoSync &&
-      finalData.coverImageUrl &&
-      finalData.coverImageUrl.startsWith('data:image/')
-    ) {
-      try {
-        const uploadRes = await githubSyncService.uploadEventImage(finalData.title, finalData.coverImageUrl);
-        if (uploadRes.success) {
-          finalData.coverImageUrl = uploadRes.coverImageUrl;
-        }
-      } catch (err) {
-        console.warn('GitHub event cover auto-upload warning:', err);
-      }
+    // Standardize images array (max 5 pictures)
+    let images = Array.isArray(finalData.images) && finalData.images.length > 0
+      ? [...finalData.images.slice(0, 5)]
+      : (finalData.coverImageUrl ? [finalData.coverImageUrl] : []);
+
+    if (images.length > 0) {
+      finalData.coverImageUrl = images[0];
     }
+    finalData.images = images;
 
     const newEvent: AdminEvent = {
       ...finalData,
@@ -102,76 +117,87 @@ export const eventService = {
     events.push(newEvent);
     saveStoredEvents(events);
 
-    // Auto-commit dataset to GitHub if configured
+    // Auto-commit dataset & pictures to GitHub if configured
     if (githubSyncService.isConfigured() && githubSyncService.getSettings().autoSync) {
-      githubSyncService.syncFullEventsToGithub(events).catch((err) => {
-        console.warn('GitHub auto-sync warning for events:', err);
-      });
+      try {
+        const syncRes = await githubSyncService.syncFullEventsToGithub(events);
+        if (syncRes.success && syncRes.events) {
+          saveStoredEvents(syncRes.events);
+          const found = syncRes.events.find((e) => e.id === newEvent.id);
+          if (found) return found;
+        }
+      } catch (err) {
+        console.warn('GitHub auto-sync warning for event creation:', err);
+      }
     }
 
     return newEvent;
   },
 
   async updateEvent(id: string, data: Partial<AdminEvent>): Promise<AdminEvent> {
-    await new Promise((r) => setTimeout(r, 100));
+    await new Promise((r) => setTimeout(r, 80));
     const events = getStoredEvents();
     const index = events.findIndex((e) => e.id === id);
     if (index === -1) throw new Error('Event not found');
 
     let updatedData = { ...data };
 
-    // Auto-upload cover image to GitHub if configured and image is base64
-    if (
-      githubSyncService.isConfigured() &&
-      githubSyncService.getSettings().autoSync &&
-      updatedData.coverImageUrl &&
-      updatedData.coverImageUrl.startsWith('data:image/')
-    ) {
-      try {
-        const eventTitle = updatedData.title || events[index].title;
-        const uploadRes = await githubSyncService.uploadEventImage(eventTitle, updatedData.coverImageUrl);
-        if (uploadRes.success) {
-          updatedData.coverImageUrl = uploadRes.coverImageUrl;
-        }
-      } catch (err) {
-        console.warn('GitHub event cover auto-upload warning:', err);
+    // Normalize images (max 5)
+    if (updatedData.images !== undefined) {
+      let images = [...(updatedData.images || []).slice(0, 5)];
+      if (images.length > 0 && !updatedData.coverImageUrl) {
+        updatedData.coverImageUrl = images[0];
       }
+      updatedData.images = images;
+    } else if (updatedData.coverImageUrl && (!events[index].images || !events[index].images.length)) {
+      updatedData.images = [updatedData.coverImageUrl];
     }
 
     const updated = { ...events[index], ...updatedData };
     events[index] = updated;
     saveStoredEvents(events);
 
-    // Auto-commit dataset to GitHub if configured
+    // Auto-commit dataset & pictures to GitHub if configured
     if (githubSyncService.isConfigured() && githubSyncService.getSettings().autoSync) {
-      githubSyncService.syncFullEventsToGithub(events).catch((err) => {
-        console.warn('GitHub auto-sync warning for events:', err);
-      });
+      try {
+        const syncRes = await githubSyncService.syncFullEventsToGithub(events);
+        if (syncRes.success && syncRes.events) {
+          saveStoredEvents(syncRes.events);
+          const found = syncRes.events.find((e) => e.id === id);
+          if (found) return found;
+        }
+      } catch (err) {
+        console.warn('GitHub auto-sync warning for event update:', err);
+      }
     }
 
     return updated;
   },
 
   async deleteEvent(id: string): Promise<void> {
-    await new Promise((r) => setTimeout(r, 100));
+    await new Promise((r) => setTimeout(r, 80));
     const events = getStoredEvents();
     const filtered = events.filter((e) => e.id !== id);
     saveStoredEvents(filtered);
 
     // Auto-commit dataset to GitHub if configured
     if (githubSyncService.isConfigured() && githubSyncService.getSettings().autoSync) {
-      githubSyncService.syncFullEventsToGithub(filtered).catch((err) => {
-        console.warn('GitHub auto-sync warning for events:', err);
-      });
+      try {
+        const syncRes = await githubSyncService.syncFullEventsToGithub(filtered);
+        if (syncRes.success && syncRes.events) {
+          saveStoredEvents(syncRes.events);
+        }
+      } catch (err) {
+        console.warn('GitHub auto-sync warning for event deletion:', err);
+      }
     }
   },
 
   async syncToGithub(): Promise<{ success: boolean; deployedCount: number; error?: string }> {
     const events = getStoredEvents();
     const result = await githubSyncService.syncFullEventsToGithub(events);
-    if (result.success) {
-      const updated = getStoredEvents();
-      saveStoredEvents(updated);
+    if (result.success && result.events) {
+      saveStoredEvents(result.events);
     }
     return result;
   },

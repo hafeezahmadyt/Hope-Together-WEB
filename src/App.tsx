@@ -6,6 +6,7 @@ import { AboutPage } from './pages/AboutPage';
 import { OurWorkPage } from './pages/OurWorkPage';
 import { PartnersPage } from './pages/PartnersPage';
 import { TeamPage } from './pages/TeamPage';
+import { EventsPage } from './pages/EventsPage';
 import { ContactPage } from './pages/ContactPage';
 
 // Admin CMS Components & Pages
@@ -31,6 +32,8 @@ export const App: React.FC = () => {
           <Route path="our-work" element={<OurWorkPage />} />
           <Route path="partners" element={<PartnersPage />} />
           <Route path="team" element={<TeamPage />} />
+          <Route path="events" element={<EventsPage />} />
+          <Route path="community" element={<EventsPage />} />
           <Route path="contact" element={<ContactPage />} />
         </Route>
 
