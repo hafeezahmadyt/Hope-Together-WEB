@@ -182,5 +182,19 @@ export const initialMockTeamMembers: AdminTeamMember[] = [
     "displayOrder": 13,
     "isActive": true,
     "id": "team-1793655463885"
+  },
+  {
+    "name": "Munnazza Khushboo",
+    "position": "Content Writer",
+    "bio": "Munnazza Khushboo is a third-semester BS English Literature student at Islamia College, University of Peshawar, and serves as a Content Writer. Passionate about reading and writing, she creates engaging stories, articles, and poetry. With a strong literary background and a creative approach, she aims to produce meaningful content that informs, inspires, and connects with readers.",
+    "category": "Core Team",
+    "photoUrl": "/assets/team/munnazza-khushboo.jpg",
+    "email": "",
+    "linkedinUrl": "",
+    "facebookUrl": "",
+    "instagramUrl": "",
+    "displayOrder": 14,
+    "isActive": true,
+    "id": "team-1793655569082"
   }
 ];
