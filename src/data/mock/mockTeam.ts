@@ -187,7 +187,7 @@ export const initialMockTeamMembers: AdminTeamMember[] = [
     "name": "Munnazza Khushboo",
     "position": "Content Writer",
     "bio": "Munnazza Khushboo is a third-semester BS English Literature student at Islamia College, University of Peshawar, and serves as a Content Writer. Passionate about reading and writing, she creates engaging stories, articles, and poetry. With a strong literary background and a creative approach, she aims to produce meaningful content that informs, inspires, and connects with readers.",
-    "category": "Core Team",
+    "category": "Executive Body",
     "photoUrl": "/assets/team/munnazza-khushboo.jpg",
     "email": "",
     "linkedinUrl": "",
