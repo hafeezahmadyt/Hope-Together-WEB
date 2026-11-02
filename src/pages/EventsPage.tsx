@@ -22,8 +22,8 @@ export const EventsPage: React.FC = () => {
       try {
         const all = await eventService.getEvents();
         if (isMounted) {
-          // Public page primarily displays Published events
-          setEvents(all.filter((e) => e.status === 'Published'));
+          // Public page displays Published and Completed events
+          setEvents(all.filter((e) => e.status === 'Published' || e.status === 'Completed'));
         }
       } catch {
         // Fallback
@@ -105,18 +105,28 @@ export const EventsPage: React.FC = () => {
 
             {/* Filter Tabs */}
             <div className="flex items-center gap-1.5 p-1 bg-slate-100 rounded-2xl self-start sm:self-auto">
-              {(['All', 'Upcoming', 'Past'] as const).map((tab) => (
+              {[
+                { label: `All (${events.length})`, val: 'All' as const },
+                {
+                  label: `Upcoming (${events.filter((e) => e.eventDate >= todayStr).length})`,
+                  val: 'Upcoming' as const,
+                },
+                {
+                  label: `Past (${events.filter((e) => e.eventDate < todayStr).length})`,
+                  val: 'Past' as const,
+                },
+              ].map((tab) => (
                 <button
-                  key={tab}
+                  key={tab.val}
                   type="button"
-                  onClick={() => setSelectedFilter(tab)}
-                  className={`px-4 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
-                    selectedFilter === tab
+                  onClick={() => setSelectedFilter(tab.val)}
+                  className={`px-3 sm:px-4 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+                    selectedFilter === tab.val
                       ? 'bg-white text-slate-900 shadow-2xs'
                       : 'text-slate-500 hover:text-slate-900'
                   }`}
                 >
-                  {tab}
+                  {tab.label}
                 </button>
               ))}
             </div>
@@ -131,17 +141,30 @@ export const EventsPage: React.FC = () => {
             <div className="py-20 text-center bg-slate-50 rounded-3xl border border-dashed border-slate-200 p-8">
               <Calendar className="w-12 h-12 text-slate-300 mx-auto mb-3" />
               <h3 className="text-lg font-medium text-slate-800 mb-1">
-                No {selectedFilter.toLowerCase()} events scheduled
+                No {selectedFilter.toLowerCase()} events found
               </h3>
               <p className="text-xs text-slate-500 max-w-sm mx-auto font-light mb-6">
-                Check back shortly or get in touch with our team to suggest or collaborate on an upcoming initiative.
+                {selectedFilter === 'Upcoming' && events.length > 0
+                  ? 'There are currently no upcoming events scheduled. View all our past community achievements below!'
+                  : 'Check back shortly or get in touch with our team to suggest or collaborate on an upcoming initiative.'}
               </p>
-              <Link
-                to="/contact"
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-900 text-white text-xs font-semibold hover:bg-slate-800 transition-colors"
-              >
-                <span>Contact Event Organizers</span>
-              </Link>
+              <div className="flex items-center justify-center gap-3">
+                {selectedFilter !== 'All' && (
+                  <button
+                    type="button"
+                    onClick={() => setSelectedFilter('All')}
+                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#1D70B8] text-white text-xs font-semibold hover:bg-blue-700 transition-colors shadow-xs cursor-pointer"
+                  >
+                    <span>View All Events ({events.length})</span>
+                  </button>
+                )}
+                <Link
+                  to="/contact"
+                  className="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-slate-900 text-white text-xs font-semibold hover:bg-slate-800 transition-colors"
+                >
+                  <span>Contact Event Organizers</span>
+                </Link>
+              </div>
             </div>
           ) : (
             <motion.div

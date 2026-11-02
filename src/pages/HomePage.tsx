@@ -6,6 +6,7 @@ import { CoreObjectives } from '../components/CoreObjectives';
 import { Partners } from '../components/Partners';
 import { AboutPreview } from '../components/AboutPreview';
 import { TeamPreview } from '../components/TeamPreview';
+import { EventsPreview } from '../components/EventsPreview';
 import { FinalCTA } from '../components/FinalCTA';
 
 export const HomePage: React.FC = () => {
@@ -27,6 +28,9 @@ export const HomePage: React.FC = () => {
 
       {/* 5. Our Partners */}
       <Partners />
+
+      {/* 5.5 Community Events & Workshops */}
+      <EventsPreview />
 
       {/* 6. About Preview & 7. Team Preview */}
       <section className="py-24 bg-[#FAF9F6] border-t border-slate-200/60">

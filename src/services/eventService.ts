@@ -4,7 +4,22 @@ import { githubSyncService } from './githubSyncService';
 
 const STORAGE_KEY = 'hope_together_cms_events';
 const DATA_VERSION_KEY = 'hope_together_events_version';
-const CURRENT_VERSION = 'v3_five_photo_events';
+const CURRENT_VERSION = 'v4_clean_official_events';
+
+const MOCK_EVENT_IDS = new Set(['event-1', 'event-2', 'event-3']);
+
+function isMockEvent(e: Partial<AdminEvent>): boolean {
+  if (e.id && MOCK_EVENT_IDS.has(e.id)) return true;
+  const slug = (e.slug || '').toLowerCase();
+  if (
+    slug.includes('example-community') ||
+    slug.includes('sample-women') ||
+    slug.includes('draft-ecological')
+  ) {
+    return true;
+  }
+  return false;
+}
 
 function getStoredEvents(): AdminEvent[] {
   try {
@@ -12,15 +27,22 @@ function getStoredEvents(): AdminEvent[] {
     if (raw) {
       const parsed: AdminEvent[] = JSON.parse(raw);
       if (Array.isArray(parsed) && parsed.length > 0) {
-        const storedIds = new Set(parsed.map((e) => e.id || e.title));
+        // Strip out any obsolete mock events
+        const cleaned = parsed.filter((e) => !isMockEvent(e));
+        const storedIds = new Set(cleaned.map((e) => e.id || e.title));
         const missingOfficial = initialMockEvents.filter((e) => !storedIds.has(e.id || e.title));
 
-        let needsUpdate = missingOfficial.length > 0;
-        const merged = parsed.map((e) => {
-          const official = initialMockEvents.find((o) => o.id === e.id || o.title === e.title);
+        let needsUpdate = missingOfficial.length > 0 || cleaned.length !== parsed.length;
+        const merged = cleaned.map((e) => {
+          const official = initialMockEvents.find((o) => o.id === e.id || o.title === e.title || o.slug === e.slug);
           if (official) {
             let updated = { ...e };
-            // Ensure cover image is updated if local is base64 or missing
+            // Ensure status syncs (e.g. Published / Completed)
+            if (official.status && official.status !== e.status) {
+              updated.status = official.status;
+              needsUpdate = true;
+            }
+            // Ensure cover image is updated if local is base64 or different
             if (
               official.coverImageUrl &&
               (!e.coverImageUrl || e.coverImageUrl.startsWith('data:image/') || e.coverImageUrl !== official.coverImageUrl)
@@ -36,6 +58,23 @@ function getStoredEvents(): AdminEvent[] {
               }
             } else if (!updated.images && updated.coverImageUrl) {
               updated.images = [updated.coverImageUrl];
+              needsUpdate = true;
+            }
+            // Sync details if updated
+            if (official.description && official.description !== e.description) {
+              updated.description = official.description;
+              needsUpdate = true;
+            }
+            if (official.eventDate && official.eventDate !== e.eventDate) {
+              updated.eventDate = official.eventDate;
+              needsUpdate = true;
+            }
+            if (official.eventTime && official.eventTime !== e.eventTime) {
+              updated.eventTime = official.eventTime;
+              needsUpdate = true;
+            }
+            if (official.location && official.location !== e.location) {
+              updated.location = official.location;
               needsUpdate = true;
             }
             return updated;
