@@ -117,8 +117,11 @@ export const Footer: React.FC = () => {
             <Link to="/about" className="text-sm text-slate-500 hover:text-slate-900 transition-colors">
               About
             </Link>
-            <Link to="/our-work" className="text-sm text-slate-500 hover:text-slate-900 transition-colors">
-              Our Work
+            <Link to="/projects" className="text-sm text-slate-500 hover:text-slate-900 transition-colors">
+              Projects
+            </Link>
+            <Link to="/events" className="text-sm text-slate-500 hover:text-slate-900 transition-colors">
+              Events
             </Link>
             <Link to="/partners" className="text-sm text-slate-500 hover:text-slate-900 transition-colors">
               Partners
@@ -139,50 +142,48 @@ export const Footer: React.FC = () => {
             <p className="text-xs text-slate-500 font-light leading-relaxed">
               For official inquiries, community coordination, or institutional correspondence:
             </p>
-            <div className="flex items-center gap-2">
-              <Mail className="w-4 h-4 text-[#1D70B8]" />
+            <div className="flex items-center gap-2 text-sm text-slate-700">
+              <Mail className="w-4 h-4 text-[#1D70B8] flex-shrink-0" />
               <a
                 href={`mailto:${settings.contactEmail}`}
-                className="text-sm font-medium text-[#1D70B8] hover:underline"
+                className="hover:text-[#1D70B8] transition-colors font-medium text-xs sm:text-sm"
               >
                 {settings.contactEmail}
               </a>
             </div>
 
-            {/* Social media channels */}
+            {/* Social Icons Strip */}
             {socialItems.length > 0 && (
-              <div className="pt-3 border-t border-slate-100">
-                <span className="text-[11px] font-medium text-slate-400 block mb-2.5">
-                  Social Media Channels
-                </span>
-                <div className="flex items-center gap-2">
-                  {socialItems.map((social) => {
-                    const Icon = social.icon;
-                    return (
-                      <a
-                        key={social.name}
-                        href={social.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={`w-9 h-9 rounded-xl flex items-center justify-center border border-slate-200/80 bg-slate-50 text-slate-600 transition-all duration-200 hover:shadow-xs active:scale-95 ${social.hoverClass}`}
-                        aria-label={social.ariaLabel}
-                        title={social.name}
-                      >
-                        <Icon className="w-4 h-4" />
-                      </a>
-                    );
-                  })}
-                </div>
+              <div className="flex items-center gap-2 pt-2">
+                {socialItems.map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <a
+                      key={item.name}
+                      href={item.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={`w-9 h-9 rounded-xl flex items-center justify-center border border-slate-200/80 bg-slate-50/50 text-slate-600 transition-all ${item.hoverClass}`}
+                      aria-label={item.ariaLabel}
+                      title={item.name}
+                    >
+                      <Icon className="w-4 h-4" />
+                    </a>
+                  );
+                })}
               </div>
             )}
           </div>
         </div>
 
-        {/* Legal & Transparency Note */}
+        {/* Bottom Micro-Bar */}
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-400 font-light">
-          <p>© {currentYear} {settings.organizationName}. All rights reserved.</p>
+          <p>© {currentYear} Hope Together Organization. All rights reserved.</p>
           <div className="flex items-center gap-6">
-            <span className="text-slate-400">Registered NGO in Khyber Pakhtunkhwa, Pakistan</span>
+            <span>Khyber Pakhtunkhwa, Pakistan</span>
+            <Link to="/admin/login" className="hover:text-slate-600 transition-colors">
+              Admin Portal
+            </Link>
           </div>
         </div>
       </div>

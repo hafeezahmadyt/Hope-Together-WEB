@@ -201,19 +201,14 @@ export const AboutPage: React.FC = () => {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.4, delay: idx * 0.08 }}
-                  className="p-6 sm:p-7 rounded-2xl bg-white/80 border border-slate-200/70 hover:border-slate-300 transition-all shadow-sm flex flex-col justify-between"
+                  className="p-6 rounded-2xl bg-slate-50/80 border border-slate-200/60 hover:bg-white hover:border-slate-300 transition-all flex flex-col justify-between"
                 >
                   <div>
-                    <div className="flex items-center justify-between mb-4">
-                      <span className="text-xs font-mono font-semibold text-slate-400">
-                        {item.number} / Pillar
-                      </span>
-                      <div className="w-9 h-9 rounded-xl bg-blue-50/80 text-[#1D70B8] flex items-center justify-center">
-                        <IconComponent className="w-4 h-4" />
-                      </div>
+                    <div className="w-10 h-10 rounded-xl bg-white border border-slate-200/70 text-[#1D70B8] flex items-center justify-center mb-4 shadow-2xs">
+                      <IconComponent className="w-5 h-5" />
                     </div>
-                    <span className="inline-block px-2.5 py-0.5 rounded-full bg-slate-100 text-[11px] font-medium text-slate-600 mb-2">
-                      {item.tag}
+                    <span className="text-xs uppercase tracking-widest text-[#1D70B8] font-semibold block mb-1">
+                      Phase {idx + 1}
                     </span>
                     <h3 className="text-lg font-medium text-slate-900 mb-2">
                       {item.title}
@@ -229,10 +224,10 @@ export const AboutPage: React.FC = () => {
 
           <div className="mt-12 text-center">
             <Link
-              to="/our-work"
+              to="/projects"
               className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-slate-900 text-white text-xs sm:text-sm font-medium hover:bg-slate-800 transition-colors shadow-sm"
             >
-              <span>View Core Objectives & Work</span>
+              <span>View Projects & Initiatives</span>
               <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
@@ -250,10 +245,10 @@ export const AboutPage: React.FC = () => {
           </p>
           <div className="flex flex-wrap items-center justify-center gap-4">
             <Link
-              to="/our-work"
+              to="/projects"
               className="inline-flex items-center gap-2 px-7 py-3 rounded-full bg-white text-slate-900 text-sm font-semibold hover:bg-slate-100 transition-all shadow-md"
             >
-              <span>Our Work</span>
+              <span>Our Projects</span>
               <ArrowRight className="w-4 h-4" />
             </Link>
             <Link

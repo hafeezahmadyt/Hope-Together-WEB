@@ -3,7 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Layout } from './components/Layout';
 import { HomePage } from './pages/HomePage';
 import { AboutPage } from './pages/AboutPage';
-import { OurWorkPage } from './pages/OurWorkPage';
+import { ProjectsPage } from './pages/ProjectsPage';
 import { PartnersPage } from './pages/PartnersPage';
 import { TeamPage } from './pages/TeamPage';
 import { EventsPage } from './pages/EventsPage';
@@ -25,15 +25,16 @@ export const App: React.FC = () => {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Public Website Routes (Kept completely intact) */}
+        {/* Public Website Routes */}
         <Route path="/" element={<Layout />}>
           <Route index element={<HomePage />} />
           <Route path="about" element={<AboutPage />} />
-          <Route path="our-work" element={<OurWorkPage />} />
-          <Route path="partners" element={<PartnersPage />} />
-          <Route path="team" element={<TeamPage />} />
+          <Route path="projects" element={<ProjectsPage />} />
+          <Route path="our-work" element={<Navigate to="/projects" replace />} />
           <Route path="events" element={<EventsPage />} />
           <Route path="community" element={<EventsPage />} />
+          <Route path="partners" element={<PartnersPage />} />
+          <Route path="team" element={<TeamPage />} />
           <Route path="contact" element={<ContactPage />} />
         </Route>
 

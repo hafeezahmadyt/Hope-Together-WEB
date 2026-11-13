@@ -1,4 +1,4 @@
-import { AdminTeamMember, AdminPartner, AdminEvent } from '../types/admin';
+import { AdminTeamMember, AdminPartner, AdminEvent, AdminProject } from '../types/admin';
 
 const GITHUB_TOKEN_KEY = 'hope_together_github_token';
 const GITHUB_OWNER_KEY = 'hope_together_github_owner';
@@ -214,10 +214,10 @@ export const githubSyncService = {
   },
 
   /**
-   * Upload an asset to a specific folder in GitHub (team, partners, events).
+   * Upload an asset to a specific folder in GitHub (team, partners, events, projects).
    */
   async uploadAsset(
-    folder: 'team' | 'partners' | 'events',
+    folder: 'team' | 'partners' | 'events' | 'projects',
     titleOrName: string,
     dataUrlOrBase64: string,
     defaultExt = 'jpg'
@@ -281,6 +281,23 @@ export const githubSyncService = {
     const suffix = index !== undefined ? `-${index + 1}` : '';
     const name = `${eventTitle}${suffix}`;
     const res = await this.uploadAsset('events', name, dataUrlOrBase64, 'jpg');
+    return {
+      success: res.success,
+      coverImageUrl: res.url,
+      url: res.url,
+      error: res.error,
+    };
+  },
+
+  // Project Cover / Gallery Image Upload (Supports up to 5 images)
+  async uploadProjectImage(
+    projectTitle: string,
+    dataUrlOrBase64: string,
+    index?: number
+  ): Promise<{ success: boolean; coverImageUrl: string; url: string; error?: string }> {
+    const suffix = index !== undefined ? `-${index + 1}` : '';
+    const name = `${projectTitle}${suffix}`;
+    const res = await this.uploadAsset('projects', name, dataUrlOrBase64, 'jpg');
     return {
       success: res.success,
       coverImageUrl: res.url,
@@ -459,6 +476,73 @@ export const githubSyncService = {
       }
 
       return { success: true, deployedCount: processedEvents.length, events: processedEvents };
+    } catch (err: any) {
+      return { success: false, deployedCount: 0, error: err?.message || 'Sync failed.' };
+    }
+  },
+
+  // Full Projects Sync (Supports up to 5 pictures per project)
+  async syncFullProjectsToGithub(
+    projects: AdminProject[]
+  ): Promise<{ success: boolean; deployedCount: number; projects?: AdminProject[]; error?: string }> {
+    const s = this.getSettings();
+    if (!s.token) {
+      return { success: false, deployedCount: 0, error: 'GitHub token not configured.' };
+    }
+
+    try {
+      const processedProjects: AdminProject[] = [];
+      let uploadedImages = 0;
+
+      for (const p of projects) {
+        let finalCoverUrl = p.coverImageUrl;
+        let finalImages: string[] = [];
+
+        const sourceImages = Array.isArray(p.images) && p.images.length > 0
+          ? p.images
+          : (p.coverImageUrl ? [p.coverImageUrl] : []);
+
+        for (let i = 0; i < Math.min(5, sourceImages.length); i++) {
+          let img = sourceImages[i];
+          if (img && img.startsWith('data:image/')) {
+            const uploadRes = await this.uploadProjectImage(p.title, img, i);
+            if (uploadRes.success) {
+              img = uploadRes.url;
+              uploadedImages++;
+            }
+          }
+          finalImages.push(img);
+        }
+
+        if (finalImages.length > 0) {
+          finalCoverUrl = finalImages[0];
+        }
+
+        processedProjects.push({
+          ...p,
+          coverImageUrl: finalCoverUrl,
+          images: finalImages,
+        });
+      }
+
+      const fileContent = `import { AdminProject } from '../../types/admin';\n\nexport const initialMockProjects: AdminProject[] = ${JSON.stringify(
+        processedProjects,
+        null,
+        2
+      )};\n`;
+
+      const base64Code = utf8ToBase64(fileContent);
+      const commitRes = await this.commitFile(
+        'src/data/mock/mockProjects.ts',
+        base64Code,
+        `CMS: Update official projects roster (${processedProjects.length} projects, ${uploadedImages} photos uploaded)`
+      );
+
+      if (!commitRes.success) {
+        return { success: false, deployedCount: 0, error: commitRes.error };
+      }
+
+      return { success: true, deployedCount: processedProjects.length, projects: processedProjects };
     } catch (err: any) {
       return { success: false, deployedCount: 0, error: err?.message || 'Sync failed.' };
     }

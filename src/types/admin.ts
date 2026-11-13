@@ -87,6 +87,10 @@ export interface AdminProject {
   startDate: string;
   endDate?: string;
   coverImageUrl?: string;
+  images?: string[];
+  fundingReceived?: string;
+  beneficiariesCount?: string;
+  donorOrPartner?: string;
   status: ContentStatus;
 }
 
