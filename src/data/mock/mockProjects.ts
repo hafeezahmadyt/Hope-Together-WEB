@@ -19,7 +19,7 @@ export const initialMockProjects: AdminProject[] = [
       "/assets/projects/clean-drinking-water-project-turangzai-charsadda-4.jpg",
       "/assets/projects/clean-drinking-water-project-turangzai-charsadda-5.jpg"
     ],
-    "status": "Completed",
+    "status": "Published",
     "id": "proj-1794611855389"
   }
 ];
