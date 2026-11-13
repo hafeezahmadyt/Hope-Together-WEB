@@ -1,18 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import {
   ArrowRight,
   CheckCircle2,
-  ChevronDown,
-  Layers,
-  FileText,
-  MapPin,
-  Calendar,
   DollarSign,
   Users,
   Sparkles,
   FolderKanban,
+  Search,
+  Compass,
+  GraduationCap,
+  HeartHandshake,
+  ShieldCheck,
+  Leaf,
 } from 'lucide-react';
 import { SEO } from '../components/SEO';
 import { PageHero } from '../components/PageHero';
@@ -23,9 +24,9 @@ import { ProjectCard } from '../components/ProjectCard';
 import { ProjectDetailModal } from '../components/ProjectDetailModal';
 
 export const ProjectsPage: React.FC = () => {
-  const [activeObjectiveId, setActiveObjectiveId] = useState<string | null>(null);
   const [projects, setProjects] = useState<AdminProject[]>([]);
   const [selectedObjectiveFilter, setSelectedObjectiveFilter] = useState<string>('All');
+  const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedProject, setSelectedProject] = useState<AdminProject | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -61,81 +62,129 @@ export const ProjectsPage: React.FC = () => {
     };
   }, []);
 
-  const toggleDetails = (id: string) => {
-    setActiveObjectiveId((prev) => (prev === id ? null : id));
+  // Filter projects by both objective pillar and search query
+  const filteredProjects = projects.filter((p) => {
+    const matchesObjective =
+      selectedObjectiveFilter === 'All' || p.objective === selectedObjectiveFilter;
+    const matchesSearch =
+      !searchQuery.trim() ||
+      p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (p.location && p.location.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (p.description && p.description.toLowerCase().includes(searchQuery.toLowerCase()));
+    return matchesObjective && matchesSearch;
+  });
+
+  // Calculate high-level impact statistics
+  const totalBeneficiaries = projects.reduce((acc, p) => {
+    if (p.beneficiariesCount) {
+      return acc + (parseInt(p.beneficiariesCount.replace(/\D/g, ''), 10) || 0);
+    }
+    return acc;
+  }, 0);
+
+  const totalFunding = projects.reduce((acc, p) => {
+    if (p.fundingReceived) {
+      return acc + (parseInt(p.fundingReceived.replace(/\D/g, ''), 10) || 0);
+    }
+    return acc;
+  }, 0);
+
+  // Pillar icon helper
+  const getPillarIcon = (number: string) => {
+    switch (number) {
+      case '01':
+        return <GraduationCap className="w-5 h-5 text-[#1D70B8]" />;
+      case '02':
+        return <HeartHandshake className="w-5 h-5 text-emerald-600" />;
+      case '03':
+        return <ShieldCheck className="w-5 h-5 text-[#1D70B8]" />;
+      case '04':
+        return <Leaf className="w-5 h-5 text-emerald-600" />;
+      default:
+        return <Compass className="w-5 h-5 text-slate-500" />;
+    }
   };
 
-  const filteredProjects = selectedObjectiveFilter === 'All'
-    ? projects
-    : projects.filter((p) => p.objective === selectedObjectiveFilter);
+  const handlePillarFilterClick = (pillarTitle: string) => {
+    setSelectedObjectiveFilter(pillarTitle);
+    const element = document.getElementById('projects-grid-section');
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
 
   return (
     <>
       <SEO
         title="Projects & Field Initiatives | Hope Together Organization"
-        description="Explore the developmental field projects, funding transparency, and community impact led by Hope Together Organization across Khyber Pakhtunkhwa, Pakistan."
+        description="Explore the developmental field projects, clean drinking water installations, funding transparency, and community impact led by Hope Together Organization across Khyber Pakhtunkhwa, Pakistan."
       />
 
       {/* Page Hero */}
       <PageHero
-        badge="Strategic Initiatives"
+        badge="Strategic Field Initiatives"
         title="Our"
         highlightedWord="Projects"
-        description="Delivering community-driven developmental projects with transparency, local ownership, and measurable impact across Khyber Pakhtunkhwa."
+        description="Delivering community-driven developmental projects with complete transparency, local ownership, and measurable impact across Khyber Pakhtunkhwa."
         accentColor="green"
       />
 
-      {/* Context Narrative & High-Level Summary Stats */}
-      <section className="py-14 bg-[#FAF9F6] border-b border-slate-200/60">
-        <div className="max-w-4xl mx-auto px-6 text-center">
-          <p className="text-base sm:text-lg text-slate-600 font-light leading-relaxed mb-6">
-            Our initiatives are structured under four strategic mandate pillars, ensuring every project directly addresses localized socio-economic, human rights, and environmental challenges.
-          </p>
-
-          {/* Quick Metrics Bar */}
-          <div className="inline-flex flex-wrap items-center justify-center gap-6 sm:gap-10 p-4 rounded-3xl bg-white border border-slate-200/80 shadow-xs">
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center font-bold">
-                <FolderKanban className="w-4 h-4" />
+      {/* High-Level Impact & Transparency Metrics */}
+      <section className="py-10 bg-[#FAF9F6] border-b border-slate-200/60">
+        <div className="max-w-6xl mx-auto px-6 sm:px-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
+            <div className="p-4 sm:p-5 rounded-2xl bg-white border border-slate-200/80 shadow-2xs flex items-center gap-3.5">
+              <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center font-bold flex-shrink-0">
+                <FolderKanban className="w-5 h-5" />
               </div>
-              <div className="text-left">
-                <span className="text-xs uppercase tracking-wider text-slate-400 font-semibold block leading-tight">
-                  Active Projects
+              <div className="min-w-0">
+                <span className="text-[10px] sm:text-xs uppercase tracking-wider text-slate-400 font-semibold block leading-tight">
+                  Active Initiatives
                 </span>
-                <span className="text-sm font-bold text-slate-900 font-mono">
-                  {projects.length} Initiatives
+                <span className="text-sm sm:text-base font-bold text-slate-900 font-mono">
+                  {projects.length} Completed / Active
                 </span>
               </div>
             </div>
 
-            <div className="h-6 w-px bg-slate-200 hidden sm:block" />
-
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-xl bg-blue-50 text-[#1D70B8] flex items-center justify-center font-bold">
-                <Users className="w-4 h-4" />
+            <div className="p-4 sm:p-5 rounded-2xl bg-white border border-slate-200/80 shadow-2xs flex items-center gap-3.5">
+              <div className="w-10 h-10 rounded-xl bg-blue-50 text-[#1D70B8] flex items-center justify-center font-bold flex-shrink-0">
+                <Users className="w-5 h-5" />
               </div>
-              <div className="text-left">
-                <span className="text-xs uppercase tracking-wider text-slate-400 font-semibold block leading-tight">
-                  Communities Served
+              <div className="min-w-0">
+                <span className="text-[10px] sm:text-xs uppercase tracking-wider text-slate-400 font-semibold block leading-tight">
+                  People Reached
                 </span>
-                <span className="text-sm font-bold text-slate-900 font-mono">
-                  Across KP Province
+                <span className="text-sm sm:text-base font-bold text-slate-900 font-mono">
+                  {totalBeneficiaries > 0 ? `${totalBeneficiaries}+ Beneficiaries` : '100+ Beneficiaries'}
                 </span>
               </div>
             </div>
 
-            <div className="h-6 w-px bg-slate-200 hidden sm:block" />
-
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-xl bg-purple-50 text-purple-700 flex items-center justify-center font-bold">
-                <DollarSign className="w-4 h-4" />
+            <div className="p-4 sm:p-5 rounded-2xl bg-white border border-slate-200/80 shadow-2xs flex items-center gap-3.5">
+              <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center font-bold flex-shrink-0">
+                <DollarSign className="w-5 h-5" />
               </div>
-              <div className="text-left">
-                <span className="text-xs uppercase tracking-wider text-slate-400 font-semibold block leading-tight">
-                  Grant Accountability
+              <div className="min-w-0">
+                <span className="text-[10px] sm:text-xs uppercase tracking-wider text-slate-400 font-semibold block leading-tight">
+                  Transparent Funding
                 </span>
-                <span className="text-sm font-bold text-slate-900 font-mono">
-                  100% Transparent
+                <span className="text-sm sm:text-base font-bold text-slate-900 font-mono">
+                  {totalFunding > 0 ? `PKR ${totalFunding.toLocaleString()}` : 'PKR 20,000+'}
+                </span>
+              </div>
+            </div>
+
+            <div className="p-4 sm:p-5 rounded-2xl bg-white border border-slate-200/80 shadow-2xs flex items-center gap-3.5">
+              <div className="w-10 h-10 rounded-xl bg-purple-50 text-purple-700 flex items-center justify-center font-bold flex-shrink-0">
+                <Sparkles className="w-5 h-5" />
+              </div>
+              <div className="min-w-0">
+                <span className="text-[10px] sm:text-xs uppercase tracking-wider text-slate-400 font-semibold block leading-tight">
+                  Field Accountability
+                </span>
+                <span className="text-sm sm:text-base font-bold text-slate-900 font-mono">
+                  100% Verified
                 </span>
               </div>
             </div>
@@ -143,10 +192,41 @@ export const ProjectsPage: React.FC = () => {
         </div>
       </section>
 
-      {/* Filter Tabs by Thematic Objective */}
-      <section className="pt-12 pb-4 bg-[#FAF9F6]">
+      {/* Main Field Projects Section */}
+      <section id="projects-grid-section" className="py-12 sm:py-16 bg-[#FAF9F6]">
         <div className="max-w-6xl mx-auto px-6 sm:px-8">
-          <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
+          {/* Section Header & Search/Filter Controls */}
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <Sparkles className="w-4 h-4 text-[#1D70B8]" />
+                <span className="text-xs uppercase tracking-[0.2em] text-[#1D70B8] font-bold">
+                  Official Registry
+                </span>
+              </div>
+              <h2 className="text-2xl sm:text-4xl font-light text-slate-900 tracking-tight">
+                Our Field Initiatives
+              </h2>
+              <p className="text-slate-600 text-sm sm:text-base font-light mt-1">
+                Explore real community interventions, funding receipts, beneficiary counts, and project photos.
+              </p>
+            </div>
+
+            {/* Search Input */}
+            <div className="w-full md:w-72 relative">
+              <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search projects by title, district..."
+                className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-white border border-slate-200 text-xs sm:text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#1D70B8] focus:border-transparent transition-all shadow-2xs"
+              />
+            </div>
+          </div>
+
+          {/* Filter Pills */}
+          <div className="flex items-center gap-2 overflow-x-auto pb-4 mb-8 scrollbar-none">
             <button
               type="button"
               onClick={() => setSelectedObjectiveFilter('All')}
@@ -176,287 +256,48 @@ export const ProjectsPage: React.FC = () => {
               );
             })}
           </div>
-        </div>
-      </section>
 
-      {/* Editorial Major Sections (Pillars Structure) */}
-      <div className="py-12 sm:py-20 bg-[#FAF9F6]">
-        <div className="max-w-6xl mx-auto px-6 sm:px-8 space-y-20 sm:space-y-28">
-          {objectivesData
-            .filter((obj) => selectedObjectiveFilter === 'All' || selectedObjectiveFilter === obj.title)
-            .map((objective, idx) => {
-              const isEven = idx % 2 === 1;
-              const isGreen = objective.accentColor === 'green';
-              const accentTextClass = isGreen ? 'text-[#16A34A]' : 'text-[#1D70B8]';
-              const accentBgClass = isGreen ? 'bg-[#DCFCE7] text-[#15803D]' : 'bg-[#E0F2FE] text-[#0369A1]';
-              const isOpen = activeObjectiveId === objective.id;
-
-              // Projects matching this objective pillar
-              const objectiveProjects = projects.filter((p) => p.objective === objective.title);
-              const featuredProject = objectiveProjects.find((p) => p.coverImageUrl) || objectiveProjects[0];
-
-              return (
-                <motion.article
-                  key={objective.id}
-                  id={objective.id}
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, margin: '-50px' }}
-                  transition={{ duration: 0.6 }}
-                  className="scroll-mt-32 p-8 sm:p-10 rounded-3xl bg-white border border-slate-200/70 shadow-xs"
-                >
-                  <div
-                    className={`grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center ${
-                      isEven ? 'lg:flex-row-reverse' : ''
-                    }`}
-                  >
-                    {/* Text Column */}
-                    <div
-                      className={`lg:col-span-7 flex flex-col justify-center ${
-                        isEven ? 'lg:order-2' : 'lg:order-1'
-                      }`}
-                    >
-                      <div className="flex items-center gap-3 mb-4">
-                        <span className="text-3xl sm:text-4xl font-mono font-light text-slate-300">
-                          {objective.number}
-                        </span>
-                        <span
-                          className={`text-[11px] font-bold px-3 py-1 rounded-full uppercase tracking-wider ${accentBgClass}`}
-                        >
-                          Mandate Pillar
-                        </span>
-                      </div>
-
-                      <h2 className="text-2xl sm:text-4xl font-light text-slate-900 tracking-tight mb-5 leading-tight">
-                        {objective.title}
-                      </h2>
-
-                      <p className="text-slate-600 text-base sm:text-lg font-light leading-relaxed mb-6">
-                        {objective.description}
-                      </p>
-
-                      {/* Focus Areas */}
-                      <div className="mb-6">
-                        <span className="text-xs uppercase tracking-widest text-slate-400 font-semibold block mb-3">
-                          Designated Focus Areas
-                        </span>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                          {objective.focusAreas.map((area) => (
-                            <div
-                              key={area}
-                              className="flex items-start gap-2.5 p-3 rounded-xl bg-slate-50 border border-slate-200/60"
-                            >
-                              <CheckCircle2 className={`w-4 h-4 mt-0.5 flex-shrink-0 ${accentTextClass}`} />
-                              <span className="text-xs sm:text-sm font-medium text-slate-700">
-                                {area}
-                              </span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-
-                      {/* Interactive Projects Drawer Trigger */}
-                      <div>
-                        <button
-                          type="button"
-                          onClick={() => toggleDetails(objective.id)}
-                          className="inline-flex items-center gap-2 text-sm font-semibold text-[#1D70B8] hover:text-blue-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-hope-blue rounded py-1 transition-colors cursor-pointer"
-                          aria-expanded={isOpen}
-                          aria-controls={`details-${objective.id}`}
-                        >
-                          <Layers className="w-4 h-4 text-slate-400" />
-                          <span>
-                            {isOpen
-                              ? 'Hide Project Roster'
-                              : `Explore Registered Projects (${objectiveProjects.length})`}
-                          </span>
-                          <ChevronDown
-                            className={`w-4 h-4 transition-transform duration-200 ${
-                              isOpen ? 'rotate-180' : ''
-                            }`}
-                          />
-                        </button>
-
-                        <AnimatePresence>
-                          {isOpen && (
-                            <motion.div
-                              id={`details-${objective.id}`}
-                              initial={{ opacity: 0, height: 0 }}
-                              animate={{ opacity: 1, height: 'auto' }}
-                              exit={{ opacity: 0, height: 0 }}
-                              transition={{ duration: 0.3 }}
-                              className="overflow-hidden mt-4"
-                            >
-                              <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200/80 text-slate-600 text-xs sm:text-sm space-y-4">
-                                <div className="flex items-center justify-between pb-2 border-b border-slate-200/70">
-                                  <div className="flex items-center gap-2 text-slate-800 font-medium">
-                                    <FileText className="w-4 h-4 text-[#1D70B8]" />
-                                    <span>Field Projects under {objective.title}</span>
-                                  </div>
-                                  <span className="text-[11px] font-mono text-slate-400">
-                                    Click any project for full funding & beneficiary data
-                                  </span>
-                                </div>
-
-                                {objectiveProjects.length > 0 ? (
-                                  <div className="grid grid-cols-1 gap-3">
-                                    {objectiveProjects.map((proj) => (
-                                      <div
-                                        key={proj.id}
-                                        onClick={() => setSelectedProject(proj)}
-                                        className="p-4 rounded-2xl bg-white border border-slate-200/70 hover:border-slate-300 hover:shadow-md transition-all cursor-pointer flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 group"
-                                      >
-                                        <div className="flex items-center gap-3">
-                                          <div className="w-12 h-10 rounded-xl bg-slate-100 overflow-hidden flex-shrink-0">
-                                            {proj.coverImageUrl ? (
-                                              <img src={proj.coverImageUrl} alt={proj.title} className="w-full h-full object-cover" />
-                                            ) : (
-                                              <FolderKanban className="w-5 h-5 text-slate-400 m-auto mt-2.5" />
-                                            )}
-                                          </div>
-                                          <div>
-                                            <h4 className="font-semibold text-slate-900 group-hover:text-[#1D70B8] transition-colors text-sm">
-                                              {proj.title}
-                                            </h4>
-                                            <div className="flex items-center gap-3 text-xs text-slate-400 mt-0.5">
-                                              <span className="flex items-center gap-1">
-                                                <MapPin className="w-3 h-3" />
-                                                {proj.location}
-                                              </span>
-                                              <span className="flex items-center gap-1 font-mono">
-                                                <Calendar className="w-3 h-3" />
-                                                {proj.startDate}
-                                              </span>
-                                            </div>
-                                          </div>
-                                        </div>
-
-                                        {/* Impact Pills */}
-                                        <div className="flex items-center gap-2 self-end sm:self-auto flex-shrink-0">
-                                          {proj.fundingReceived && (
-                                            <span className="px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-700 text-xs font-bold font-mono border border-emerald-200/60 flex items-center gap-1">
-                                              <DollarSign className="w-3 h-3" />
-                                              {proj.fundingReceived}
-                                            </span>
-                                          )}
-                                          {proj.beneficiariesCount && (
-                                            <span className="px-2.5 py-1 rounded-lg bg-blue-50 text-[#1D70B8] text-xs font-bold font-mono border border-blue-200/60 flex items-center gap-1">
-                                              <Users className="w-3 h-3" />
-                                              {proj.beneficiariesCount}
-                                            </span>
-                                          )}
-                                        </div>
-                                      </div>
-                                    ))}
-                                  </div>
-                                ) : (
-                                  <div className="p-4 rounded-xl bg-white border border-dashed border-slate-200 text-center">
-                                    <p className="text-xs text-slate-400 font-light">
-                                      No field projects currently registered under this pillar.
-                                    </p>
-                                  </div>
-                                )}
-                              </div>
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
-                      </div>
-                    </div>
-
-                    {/* Visual Column / Featured Project Photo */}
-                    <div className={`lg:col-span-5 ${isEven ? 'lg:order-1' : 'lg:order-2'}`}>
-                      <div
-                        onClick={() => featuredProject && setSelectedProject(featuredProject)}
-                        className={`relative rounded-3xl overflow-hidden bg-slate-100 border border-slate-200/70 p-6 sm:p-8 flex flex-col items-center justify-center min-h-[300px] sm:min-h-[380px] text-center shadow-sm group hover:border-slate-300 transition-all ${
-                          featuredProject ? 'cursor-pointer' : ''
-                        }`}
-                      >
-                        {featuredProject?.coverImageUrl ? (
-                          <>
-                            <img
-                              src={featuredProject.coverImageUrl}
-                              alt={featuredProject.title}
-                              className="w-full h-full object-cover absolute inset-0 group-hover:scale-105 transition-transform duration-500"
-                            />
-                            <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/20 to-transparent" />
-                            <div className="absolute bottom-5 inset-x-5 text-left text-white">
-                              <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/90 text-white mb-1.5 inline-block">
-                                Featured Project
-                              </span>
-                              <h3 className="text-lg font-bold leading-tight drop-shadow-sm mb-1">
-                                {featuredProject.title}
-                              </h3>
-                              <div className="flex items-center gap-3 text-xs text-slate-200 font-mono">
-                                {featuredProject.fundingReceived && (
-                                  <span>💰 {featuredProject.fundingReceived}</span>
-                                )}
-                                {featuredProject.beneficiariesCount && (
-                                  <span>👥 {featuredProject.beneficiariesCount}</span>
-                                )}
-                              </div>
-                            </div>
-                          </>
-                        ) : (
-                          <>
-                            <div className="w-16 h-16 rounded-2xl bg-white border border-slate-200 flex items-center justify-center text-slate-400 group-hover:scale-105 transition-transform mb-4">
-                              <FolderKanban className="w-8 h-8 text-slate-400" />
-                            </div>
-                            <span className="text-xs uppercase tracking-widest text-slate-500 font-semibold mb-1">
-                              {objective.title}
-                            </span>
-                            <p className="text-xs text-slate-400 font-mono max-w-xs leading-relaxed">
-                              Official program initiatives and field implementation photos
-                            </p>
-                            <div className="mt-4 pt-3 border-t border-slate-200 w-full flex items-center justify-center gap-2 text-[11px] text-slate-400">
-                              <span>Pillar {objective.number}</span>
-                              <span>•</span>
-                              <span>Khyber Pakhtunkhwa</span>
-                            </div>
-                          </>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </motion.article>
-              );
-            })}
-        </div>
-      </div>
-
-      {/* Complete Projects Showcase Cards Grid */}
-      <section className="py-20 bg-white border-t border-slate-200/60">
-        <div className="max-w-6xl mx-auto px-6 sm:px-8">
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10 pb-4 border-b border-slate-200/70">
-            <div>
-              <div className="flex items-center gap-2 mb-1.5">
-                <Sparkles className="w-4 h-4 text-[#1D70B8]" />
-                <span className="text-xs uppercase tracking-[0.2em] text-slate-400 font-semibold">
-                  Field Gallery
-                </span>
-              </div>
-              <h2 className="text-2xl sm:text-3xl font-light text-slate-900 tracking-tight">
-                All Field Projects & Transparency Records
-              </h2>
-            </div>
-            <span className="text-xs font-mono text-slate-400">
-              Showing {filteredProjects.length} active initiatives
-            </span>
-          </div>
-
+          {/* Projects Grid Display */}
           {isLoading ? (
-            <div className="py-20 text-center text-slate-400 font-mono text-xs">
-              Loading projects...
+            <div className="py-24 text-center">
+              <div className="w-10 h-10 border-3 border-[#1D70B8] border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+              <p className="text-xs font-mono text-slate-400">Loading verified projects...</p>
             </div>
           ) : filteredProjects.length === 0 ? (
-            <div className="py-16 text-center bg-slate-50 rounded-3xl border border-dashed border-slate-200 p-8">
-              <FolderKanban className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-              <h3 className="text-lg font-medium text-slate-800 mb-1">No projects registered</h3>
-              <p className="text-xs text-slate-500 font-light mb-4">
-                Projects uploaded through the admin portal will automatically display here.
+            <div className="py-16 px-6 text-center bg-white rounded-3xl border border-dashed border-slate-200 shadow-2xs max-w-xl mx-auto">
+              <div className="w-12 h-12 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-3">
+                <FolderKanban className="w-6 h-6" />
+              </div>
+              <h3 className="text-base font-semibold text-slate-900 mb-1">
+                {selectedObjectiveFilter !== 'All'
+                  ? `No initiatives published yet under "${selectedObjectiveFilter}"`
+                  : 'No projects match your query'}
+              </h3>
+              <p className="text-xs sm:text-sm text-slate-500 font-light mb-5 max-w-md mx-auto leading-relaxed">
+                {selectedObjectiveFilter !== 'All'
+                  ? 'We are actively planning grassroots initiatives in this mandate pillar. You can collaborate with us to launch a new intervention.'
+                  : 'Try resetting your search query or view all projects.'}
               </p>
+              <div className="flex flex-wrap items-center justify-center gap-3">
+                {selectedObjectiveFilter !== 'All' && (
+                  <button
+                    type="button"
+                    onClick={() => setSelectedObjectiveFilter('All')}
+                    className="px-5 py-2.5 rounded-full bg-slate-900 text-white text-xs font-medium hover:bg-slate-800 transition-colors cursor-pointer"
+                  >
+                    View All Initiatives ({projects.length})
+                  </button>
+                )}
+                <Link
+                  to="/contact#get-involved"
+                  className="px-5 py-2.5 rounded-full bg-blue-50 text-[#1D70B8] border border-blue-200/70 text-xs font-medium hover:bg-blue-100 transition-colors"
+                >
+                  Propose an Initiative
+                </Link>
+              </div>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
               {filteredProjects.map((proj) => (
                 <ProjectCard
                   key={proj.id}
@@ -470,17 +311,110 @@ export const ProjectsPage: React.FC = () => {
         </div>
       </section>
 
+      {/* Strategic Mandate Pillars Section (Clean, Structured, Zero Dummy Pictures) */}
+      <section className="py-16 sm:py-24 bg-white border-t border-slate-200/60">
+        <div className="max-w-6xl mx-auto px-6 sm:px-8">
+          <div className="max-w-2xl mb-12 sm:mb-16">
+            <span className="text-xs uppercase tracking-[0.25em] text-[#1D70B8] font-bold block mb-2">
+              Foundational Focus
+            </span>
+            <h2 className="text-2xl sm:text-4xl font-light text-slate-900 tracking-tight leading-tight mb-4">
+              Our Strategic Mandate Pillars
+            </h2>
+            <p className="text-slate-600 text-sm sm:text-base font-light leading-relaxed">
+              Every project implemented by Hope Together Organization addresses deep-rooted challenges across Khyber Pakhtunkhwa under four core thematic areas.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
+            {objectivesData.map((obj) => {
+              const pillarProjectsCount = projects.filter((p) => p.objective === obj.title).length;
+              const isSelected = selectedObjectiveFilter === obj.title;
+
+              return (
+                <motion.div
+                  key={obj.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.4 }}
+                  className={`p-6 sm:p-8 rounded-3xl border transition-all flex flex-col justify-between ${
+                    isSelected
+                      ? 'bg-blue-50/40 border-[#1D70B8] shadow-md ring-1 ring-[#1D70B8]'
+                      : 'bg-slate-50/60 border-slate-200/80 hover:border-slate-300 hover:bg-slate-50 shadow-2xs'
+                  }`}
+                >
+                  <div>
+                    {/* Header Row */}
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-2xl bg-white border border-slate-200/80 flex items-center justify-center shadow-2xs">
+                          {getPillarIcon(obj.number)}
+                        </div>
+                        <span className="text-xs font-mono font-bold text-slate-400">
+                          Pillar {obj.number}
+                        </span>
+                      </div>
+                      <span className="text-[10px] font-bold font-mono px-2.5 py-1 rounded-full bg-white border border-slate-200 text-slate-600">
+                        {pillarProjectsCount} {pillarProjectsCount === 1 ? 'Project' : 'Projects'}
+                      </span>
+                    </div>
+
+                    <h3 className="text-xl sm:text-2xl font-normal text-slate-900 tracking-tight mb-3">
+                      {obj.title}
+                    </h3>
+
+                    <p className="text-slate-600 text-xs sm:text-sm font-light leading-relaxed mb-6">
+                      {obj.description}
+                    </p>
+
+                    {/* Designated Focus Areas list */}
+                    <div className="space-y-2 mb-6">
+                      <span className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold block mb-2">
+                        Core Focus Areas
+                      </span>
+                      {obj.focusAreas.map((area) => (
+                        <div key={area} className="flex items-start gap-2 text-xs text-slate-700">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 mt-0.5 flex-shrink-0" />
+                          <span>{area}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Filter Action Trigger */}
+                  <div className="pt-4 border-t border-slate-200/60 flex items-center justify-between">
+                    <button
+                      type="button"
+                      onClick={() => handlePillarFilterClick(obj.title)}
+                      className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#1D70B8] hover:text-blue-800 transition-colors cursor-pointer"
+                    >
+                      <span>
+                        {pillarProjectsCount > 0
+                          ? `Explore ${pillarProjectsCount} Registered Project(s)`
+                          : `Filter initiatives by this pillar`}
+                      </span>
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </motion.div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
       {/* Collaboration Call to Action */}
       <section className="py-20 sm:py-24 bg-[#FAF9F6] border-t border-slate-200/60 text-center">
         <div className="max-w-3xl mx-auto px-6">
-          <span className="text-xs uppercase tracking-[0.25em] text-[#1D70B8] font-semibold block mb-3">
-            Collaboration & Grant Inquiries
+          <span className="text-xs uppercase tracking-[0.25em] text-[#1D70B8] font-bold block mb-3">
+            Grant & Partnership Collaboration
           </span>
           <h2 className="text-3xl sm:text-4xl font-light text-slate-900 tracking-tight mb-4">
-            Partner With Us on These Initiatives
+            Partner With Us on Future Field Initiatives
           </h2>
           <p className="text-slate-600 text-sm sm:text-base font-light max-w-xl mx-auto mb-8 leading-relaxed">
-            International agencies, public institutions, and corporate CSR programs are invited to review our project metrics and co-design sustainable community interventions.
+            International agencies, public institutions, and corporate CSR programs are invited to review our project metrics and co-design sustainable community interventions across Khyber Pakhtunkhwa.
           </p>
           <div className="flex flex-wrap items-center justify-center gap-4">
             <Link
@@ -492,7 +426,7 @@ export const ProjectsPage: React.FC = () => {
             </Link>
             <Link
               to="/contact#get-involved"
-              className="inline-flex items-center gap-2 px-7 py-3 rounded-full bg-white text-slate-800 border border-slate-200 text-sm font-medium hover:bg-slate-50 transition-all shadow-xs"
+              className="inline-flex items-center gap-2 px-7 py-3 rounded-full bg-white text-slate-800 border border-slate-200 text-sm font-medium hover:bg-slate-50 transition-all shadow-2xs"
             >
               <span>Get Involved</span>
             </Link>
@@ -511,5 +445,5 @@ export const ProjectsPage: React.FC = () => {
   );
 };
 
-// Also export as OurWorkPage for backward compatibility if any legacy import references it
+// Also export as OurWorkPage for backward compatibility
 export const OurWorkPage = ProjectsPage;

@@ -29,10 +29,12 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
   const initialCover = photos[0] || '';
   const [imgSrc, setImgSrc] = useState(initialCover);
   const [imgError, setImgError] = useState(false);
+  const [triedFallback, setTriedFallback] = useState(false);
 
   React.useEffect(() => {
     setImgSrc(photos[0] || '');
     setImgError(false);
+    setTriedFallback(false);
   }, [photos[0]]);
 
   // Objective color mapping
@@ -65,10 +67,15 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
               alt={project.title}
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
               onError={() => {
-                if (imgSrc.endsWith('.jpg')) {
-                  setImgSrc(imgSrc.replace(/\.jpg$/, '.png'));
-                } else if (imgSrc.endsWith('.png')) {
-                  setImgSrc(imgSrc.replace(/\.png$/, '.jpg'));
+                if (!triedFallback) {
+                  setTriedFallback(true);
+                  if (imgSrc.endsWith('.jpg')) {
+                    setImgSrc(imgSrc.replace(/\.jpg$/, '.png'));
+                  } else if (imgSrc.endsWith('.png')) {
+                    setImgSrc(imgSrc.replace(/\.png$/, '.jpg'));
+                  } else {
+                    setImgError(true);
+                  }
                 } else {
                   setImgError(true);
                 }
@@ -124,7 +131,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
                   Funding
                 </span>
                 <span className="text-xs font-bold text-emerald-950 font-mono truncate">
-                  {project.fundingReceived || 'Funded'}
+                  {project.fundingReceived ? `PKR ${project.fundingReceived}` : 'Funded'}
                 </span>
               </div>
             </div>

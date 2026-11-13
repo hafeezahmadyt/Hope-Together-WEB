@@ -5,9 +5,13 @@ import { githubSyncService } from './githubSyncService';
 const STORAGE_KEY = 'hope_together_cms_projects';
 const DATA_VERSION_KEY = 'hope_together_projects_version';
 const DELETED_PROJECTS_KEY = 'hope_together_deleted_project_ids';
-const CURRENT_VERSION = 'v3_clean_authentic_projects';
+const CURRENT_VERSION = 'v5_official_field_projects';
 
 const MOCK_PROJECT_IDS = new Set(['proj-1', 'proj-2', 'proj-3', 'proj-4']);
+
+function normalizeText(text?: string): string {
+  return (text || '').toLowerCase().replace(/\s+/g, ' ').trim();
+}
 
 function isMockProject(p: Partial<AdminProject>): boolean {
   if (p.id && MOCK_PROJECT_IDS.has(p.id)) return true;
@@ -51,22 +55,45 @@ function markProjectAsDeleted(id: string): void {
 
 function getStoredProjects(): AdminProject[] {
   try {
-    const deletedIds = getDeletedProjectIds();
+    const storedVersion = typeof localStorage !== 'undefined' ? localStorage.getItem(DATA_VERSION_KEY) : null;
+    
+    // When code is deployed with official projects, invalidate stale local cache
+    if (storedVersion !== CURRENT_VERSION) {
+      if (typeof localStorage !== 'undefined') {
+        localStorage.removeItem(DELETED_PROJECTS_KEY);
+      }
+    }
+
+    const deletedIds = storedVersion === CURRENT_VERSION ? getDeletedProjectIds() : new Set<string>();
     const raw = typeof localStorage !== 'undefined' ? localStorage.getItem(STORAGE_KEY) : null;
-    if (raw) {
+    
+    if (raw && storedVersion === CURRENT_VERSION) {
       const parsed: AdminProject[] = JSON.parse(raw);
-      if (Array.isArray(parsed)) {
+      if (Array.isArray(parsed) && parsed.length > 0) {
         // Strip out mock projects and user-deleted projects
         const cleaned = parsed.filter((p) => !isMockProject(p) && !deletedIds.has(p.id));
 
-        const storedIds = new Set(cleaned.map((p) => p.id || p.title));
+        const storedKeys = new Set(
+          cleaned.flatMap((p) => [p.id, normalizeText(p.title), p.slug]).filter(Boolean)
+        );
+
         const missingOfficial = initialMockProjects.filter(
-          (p) => !isMockProject(p) && !deletedIds.has(p.id) && !storedIds.has(p.id || p.title)
+          (p) =>
+            !isMockProject(p) &&
+            !deletedIds.has(p.id) &&
+            !storedKeys.has(p.id) &&
+            !storedKeys.has(normalizeText(p.title)) &&
+            !storedKeys.has(p.slug)
         );
 
         let needsUpdate = missingOfficial.length > 0 || cleaned.length !== parsed.length;
         const merged = cleaned.map((p) => {
-          const official = initialMockProjects.find((o) => o.id === p.id || o.title === p.title || o.slug === p.slug);
+          const official = initialMockProjects.find(
+            (o) =>
+              o.id === p.id ||
+              normalizeText(o.title) === normalizeText(p.title) ||
+              o.slug === p.slug
+          );
           if (official) {
             let updated = { ...p };
 
