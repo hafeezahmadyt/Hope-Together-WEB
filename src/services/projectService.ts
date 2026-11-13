@@ -4,24 +4,72 @@ import { githubSyncService } from './githubSyncService';
 
 const STORAGE_KEY = 'hope_together_cms_projects';
 const DATA_VERSION_KEY = 'hope_together_projects_version';
-const CURRENT_VERSION = 'v2_projects_with_funding_and_beneficiaries';
+const DELETED_PROJECTS_KEY = 'hope_together_deleted_project_ids';
+const CURRENT_VERSION = 'v3_clean_authentic_projects';
+
+const MOCK_PROJECT_IDS = new Set(['proj-1', 'proj-2', 'proj-3', 'proj-4']);
+
+function isMockProject(p: Partial<AdminProject>): boolean {
+  if (p.id && MOCK_PROJECT_IDS.has(p.id)) return true;
+  const slug = (p.slug || '').toLowerCase();
+  if (
+    slug.includes('youth-vocational-skill') ||
+    slug.includes('women-legal-awareness') ||
+    slug.includes('child-protection-inclusive') ||
+    slug.includes('grassroots-ecological-tree') ||
+    slug.includes('sample-')
+  ) {
+    return true;
+  }
+  return false;
+}
+
+function getDeletedProjectIds(): Set<string> {
+  try {
+    const raw = typeof localStorage !== 'undefined' ? localStorage.getItem(DELETED_PROJECTS_KEY) : null;
+    if (raw) {
+      const arr = JSON.parse(raw);
+      if (Array.isArray(arr)) return new Set(arr);
+    }
+  } catch {
+    // Ignore
+  }
+  return new Set();
+}
+
+function markProjectAsDeleted(id: string): void {
+  try {
+    if (typeof localStorage !== 'undefined') {
+      const deleted = getDeletedProjectIds();
+      deleted.add(id);
+      localStorage.setItem(DELETED_PROJECTS_KEY, JSON.stringify(Array.from(deleted)));
+    }
+  } catch {
+    // Ignore
+  }
+}
 
 function getStoredProjects(): AdminProject[] {
   try {
+    const deletedIds = getDeletedProjectIds();
     const raw = typeof localStorage !== 'undefined' ? localStorage.getItem(STORAGE_KEY) : null;
     if (raw) {
       const parsed: AdminProject[] = JSON.parse(raw);
-      if (Array.isArray(parsed) && parsed.length > 0) {
-        const storedIds = new Set(parsed.map((p) => p.id || p.title));
-        const missingOfficial = initialMockProjects.filter((p) => !storedIds.has(p.id || p.title));
+      if (Array.isArray(parsed)) {
+        // Strip out mock projects and user-deleted projects
+        const cleaned = parsed.filter((p) => !isMockProject(p) && !deletedIds.has(p.id));
 
-        let needsUpdate = missingOfficial.length > 0;
-        const merged = parsed.map((p) => {
+        const storedIds = new Set(cleaned.map((p) => p.id || p.title));
+        const missingOfficial = initialMockProjects.filter(
+          (p) => !isMockProject(p) && !deletedIds.has(p.id) && !storedIds.has(p.id || p.title)
+        );
+
+        let needsUpdate = missingOfficial.length > 0 || cleaned.length !== parsed.length;
+        const merged = cleaned.map((p) => {
           const official = initialMockProjects.find((o) => o.id === p.id || o.title === p.title || o.slug === p.slug);
           if (official) {
             let updated = { ...p };
 
-            // Sync official cover and gallery images if updated
             if (
               official.coverImageUrl &&
               (!p.coverImageUrl || p.coverImageUrl.startsWith('data:image/') || p.coverImageUrl !== official.coverImageUrl)
@@ -39,7 +87,6 @@ function getStoredProjects(): AdminProject[] {
               needsUpdate = true;
             }
 
-            // Sync funding, beneficiaries, status, and description
             if (official.fundingReceived && official.fundingReceived !== p.fundingReceived) {
               updated.fundingReceived = official.fundingReceived;
               needsUpdate = true;
@@ -89,13 +136,14 @@ function getStoredProjects(): AdminProject[] {
     // Fallback gracefully
   }
 
+  const validInitial = initialMockProjects.filter((p) => !isMockProject(p));
   if (typeof localStorage !== 'undefined') {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(initialMockProjects));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(validInitial));
       localStorage.setItem(DATA_VERSION_KEY, CURRENT_VERSION);
     } catch {}
   }
-  return initialMockProjects;
+  return validInitial;
 }
 
 function saveStoredProjects(projects: AdminProject[]): void {
@@ -112,7 +160,7 @@ function saveStoredProjects(projects: AdminProject[]): void {
 
 export const projectService = {
   async getProjects(): Promise<AdminProject[]> {
-    await new Promise((r) => setTimeout(r, 60));
+    await new Promise((r) => setTimeout(r, 50));
     return getStoredProjects();
   },
 
@@ -204,6 +252,7 @@ export const projectService = {
 
   async deleteProject(id: string): Promise<void> {
     await new Promise((r) => setTimeout(r, 80));
+    markProjectAsDeleted(id);
     const projects = getStoredProjects();
     const filtered = projects.filter((p) => p.id !== id);
     saveStoredProjects(filtered);
