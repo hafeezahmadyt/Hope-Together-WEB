@@ -48,7 +48,7 @@ export const initialMockTeamMembers: AdminTeamMember[] = [
     "position": "Finance Secretary ",
     "bio": "Naseem ur Rehman holds an MA in English from Bacha Khan University and has experience working with CPDI and Individual Land on local government initiatives. He currently serves as a Program Officer at Alkhidmat Foundation. Actively involved in youth advocacy, he is a Youth Member of the United Nations Association of Pakistan (UNAP) and a Co-Opted Member of the District Child Protection Committee under KP-CP&WC. He is committed to promoting child rights, youth participation, and community development.",
     "category": "Core Team",
-    "photoUrl": "/assets/team/naseem-ur-rehman.jpg",
+    "photoUrl": "/assets/team/naseem-ur-rehman.png",
     "email": "",
     "linkedinUrl": "",
     "facebookUrl": "",
