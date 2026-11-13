@@ -2,24 +2,6 @@ import { AdminProject } from '../../types/admin';
 
 export const initialMockProjects: AdminProject[] = [
   {
-    "id": "proj-1",
-    "title": "Youth Vocational Skill Incubation",
-    "slug": "youth-vocational-skill-incubation",
-    "objective": "Youth Empowerment",
-    "description": "A targeted skill enhancement initiative providing grassroots youth across Khyber Pakhtunkhwa with digital tool proficiency, vocational trade apprenticeships, and leadership mentorship for self-reliance.",
-    "location": "Central & Southern Khyber Pakhtunkhwa",
-    "startDate": "2026-03-01",
-    "endDate": "2026-11-30",
-    "coverImageUrl": "/assets/hero-bg.jpg",
-    "images": [
-      "/assets/hero-bg.jpg"
-    ],
-    "fundingReceived": "PKR 3,500,000",
-    "beneficiariesCount": "850+ Youth & Students",
-    "donorOrPartner": "Youth Development Collaborative & Local Chambers",
-    "status": "Published"
-  },
-  {
     "id": "proj-2",
     "title": "Women Legal Awareness & Dignity Initiative",
     "slug": "women-legal-awareness-dignity-initiative",
@@ -53,6 +35,24 @@ export const initialMockProjects: AdminProject[] = [
     "fundingReceived": "PKR 5,000,000",
     "beneficiariesCount": "3,000+ Community Residents",
     "donorOrPartner": "Regional Environmental Action Alliance",
+    "status": "Published"
+  },
+  {
+    "id": "proj-1",
+    "title": "Youth Vocational Skill Incubation",
+    "slug": "youth-vocational-skill-incubation",
+    "objective": "Youth Empowerment",
+    "description": "A targeted skill enhancement initiative providing grassroots youth across Khyber Pakhtunkhwa with digital tool proficiency, vocational trade apprenticeships, and leadership mentorship for self-reliance.",
+    "location": "Central & Southern Khyber Pakhtunkhwa",
+    "startDate": "2026-03-01",
+    "endDate": "2026-11-30",
+    "coverImageUrl": "/assets/hero-bg.jpg",
+    "images": [
+      "/assets/hero-bg.jpg"
+    ],
+    "fundingReceived": "PKR 3,500,000",
+    "beneficiariesCount": "850+ Youth & Students",
+    "donorOrPartner": "Youth Development Collaborative & Local Chambers",
     "status": "Published"
   }
 ];
