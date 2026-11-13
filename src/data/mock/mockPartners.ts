@@ -74,5 +74,16 @@ export const initialMockPartners: AdminPartner[] = [
     "displayOrder": 7,
     "isActive": true,
     "websiteUrl": ""
+  },
+  {
+    "name": "NEXXT EVENTS",
+    "category": "Community Partners",
+    "categorySubtitle": "",
+    "description": "",
+    "logoUrl": "/assets/partners/nexxt-events.png",
+    "websiteUrl": "",
+    "displayOrder": 8,
+    "isActive": true,
+    "id": "partner-1794613518505"
   }
 ];
