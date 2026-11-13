@@ -20,27 +20,81 @@ export const Hero: React.FC = () => {
         <div className="absolute inset-0 bg-gradient-to-b from-[#FAF9F6] via-[#FAF9F6]/85 to-[#FAF9F6]" />
         <div className="absolute inset-0 bg-radial from-transparent via-white/40 to-[#FAF9F6]" />
 
-        {/* Ambient Glowing Orbs */}
-        <div className="absolute inset-0 overflow-hidden mix-blend-multiply opacity-70">
-          <div
-            className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[34rem] h-[34rem] rounded-full blur-[110px] animate-orb-1"
+        {/* Ambient Glowing Orbs with Decent, Organic Interplay Animation */}
+        <div className="absolute inset-0 overflow-hidden mix-blend-multiply opacity-80 pointer-events-none">
+          {/* Primary Hope Blue Orb */}
+          <motion.div
+            animate={{
+              x: [-25, 40, -20, 30, -25],
+              y: [-20, 30, -35, 20, -20],
+              scale: [1, 1.10, 0.95, 1.06, 1],
+            }}
+            transition={{
+              duration: 18,
+              repeat: Infinity,
+              ease: 'easeInOut',
+            }}
+            className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[34rem] sm:w-[42rem] h-[34rem] sm:h-[42rem] rounded-full blur-[100px] sm:blur-[130px] will-change-transform"
             style={{
               background:
-                'radial-gradient(circle, rgba(29, 112, 184, 0.45) 0%, rgba(2, 132, 199, 0.25) 50%, transparent 75%)',
+                'radial-gradient(circle, rgba(29, 112, 184, 0.50) 0%, rgba(2, 132, 199, 0.30) 45%, rgba(14, 165, 233, 0.12) 65%, transparent 78%)',
             }}
           />
-          <div
-            className="absolute top-1/3 left-1/4 w-[28rem] h-[28rem] rounded-full blur-[120px] animate-orb-2"
+
+          {/* Primary Growth Green Orb (Moving in Counter-Harmony) */}
+          <motion.div
+            animate={{
+              x: [30, -40, 25, -35, 30],
+              y: [25, -30, 35, -25, 25],
+              scale: [1, 0.94, 1.12, 0.98, 1],
+            }}
+            transition={{
+              duration: 20,
+              repeat: Infinity,
+              ease: 'easeInOut',
+            }}
+            className="absolute top-1/3 left-1/4 -translate-y-1/2 w-[30rem] sm:w-[38rem] h-[30rem] sm:h-[38rem] rounded-full blur-[105px] sm:blur-[135px] will-change-transform"
             style={{
               background:
-                'radial-gradient(circle, rgba(22, 163, 74, 0.38) 0%, rgba(167, 243, 208, 0.2) 60%, transparent 80%)',
+                'radial-gradient(circle, rgba(22, 163, 74, 0.44) 0%, rgba(34, 197, 94, 0.26) 45%, rgba(167, 243, 208, 0.14) 65%, transparent 80%)',
             }}
           />
-          <div
-            className="absolute top-1/2 right-1/4 w-[32rem] h-[32rem] rounded-full blur-[130px] animate-orb-1"
+
+          {/* Soft Aqua/Mint Confluence Orb (Soft Flow Between Blue & Green) */}
+          <motion.div
+            animate={{
+              x: [0, -30, 35, -20, 0],
+              y: [0, 40, -25, 30, 0],
+              scale: [0.96, 1.12, 1, 1.08, 0.96],
+            }}
+            transition={{
+              duration: 24,
+              repeat: Infinity,
+              ease: 'easeInOut',
+            }}
+            className="absolute top-1/2 right-1/4 -translate-y-1/2 w-[32rem] sm:w-[40rem] h-[32rem] sm:h-[40rem] rounded-full blur-[110px] sm:blur-[140px] will-change-transform"
             style={{
               background:
-                'radial-gradient(circle, rgba(2, 132, 199, 0.35) 0%, rgba(29, 112, 184, 0.2) 50%, transparent 75%)',
+                'radial-gradient(circle, rgba(14, 165, 233, 0.38) 0%, rgba(16, 185, 129, 0.26) 45%, transparent 75%)',
+            }}
+          />
+
+          {/* Central Soft Glow directly behind HOPE Together Organization */}
+          <motion.div
+            animate={{
+              x: [-15, 25, -30, 15, -15],
+              y: [15, -25, 20, -30, 15],
+              scale: [1.02, 0.96, 1.08, 0.97, 1.02],
+            }}
+            transition={{
+              duration: 22,
+              repeat: Infinity,
+              ease: 'easeInOut',
+            }}
+            className="absolute top-[36%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[28rem] sm:w-[36rem] h-[28rem] sm:h-[36rem] rounded-full blur-[90px] sm:blur-[120px] will-change-transform"
+            style={{
+              background:
+                'radial-gradient(circle, rgba(29, 112, 184, 0.38) 0%, rgba(22, 163, 74, 0.30) 45%, transparent 75%)',
             }}
           />
         </div>
