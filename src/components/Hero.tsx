@@ -9,107 +9,109 @@ export const Hero: React.FC = () => {
       id="hero"
       className="relative min-h-[96vh] sm:min-h-screen w-full flex items-center justify-center overflow-hidden pt-28 pb-16 bg-[#FAF9F6]"
     >
-      {/* Dynamic Ambient Color Backdrop (Authentic Logo Colors Floating Behind Typography) */}
+      {/* Dynamic Ambient Color Backdrop (Authentic Logo Colors Blending Together & Blending Away) */}
       <div className="absolute inset-0 z-0 select-none pointer-events-none overflow-hidden">
-        {/* Subtle canvas base gradient */}
-        <div className="absolute inset-0 bg-radial from-transparent via-white/50 to-[#FAF9F6]" />
+        {/* Clean canvas radial diffusion base */}
+        <div className="absolute inset-0 bg-radial from-transparent via-white/40 to-[#FAF9F6]" />
 
-        {/* Ambient Glowing Logo Colors Container */}
-        <div className="absolute inset-0 overflow-hidden mix-blend-multiply opacity-85 pointer-events-none">
-          {/* 1. Official Hope Blue Orb - Drifts freely around the top & right */}
+        {/* Ambient Glowing Logo Colors Container with Enhanced Blur & Convergence/Divergence */}
+        <div className="absolute inset-0 overflow-hidden mix-blend-multiply opacity-90 pointer-events-none">
+          {/* 1. Primary Hope Blue Mass (Strong, Bold & Vibrant Presence) */}
           <motion.div
             animate={{
-              x: [0, 55, -40, 30, -50, 35, 0],
-              y: [0, -45, 30, -35, 45, -20, 0],
-              scale: [1, 1.16, 0.92, 1.10, 0.95, 1.12, 1],
-              rotate: [0, 40, -35, 55, -20, 15, 0],
+              // Starts separate on the right -> converges to center (blends with green) -> blooms -> diverges to left (blends away) -> returns to center -> returns to right
+              x: [130, 20, 0, -25, -140, -40, 0, 80, 130],
+              y: [-40, -15, 0, 15, 50, 20, 0, -25, -40],
+              scale: [0.95, 1.12, 1.25, 1.15, 0.90, 1.08, 1.20, 1.02, 0.95],
             }}
             transition={{
-              duration: 21,
+              duration: 20,
               repeat: Infinity,
               ease: 'easeInOut',
             }}
-            className="absolute top-[32%] left-[54%] -translate-x-1/2 -translate-y-1/2 w-[30rem] sm:w-[42rem] h-[30rem] sm:h-[42rem] rounded-full blur-[95px] sm:blur-[125px] will-change-transform"
+            className="absolute top-[35%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[36rem] sm:w-[50rem] h-[36rem] sm:h-[50rem] rounded-full blur-[130px] sm:blur-[180px] will-change-transform"
             style={{
               background:
-                'radial-gradient(circle, rgba(29, 112, 184, 0.55) 0%, rgba(2, 132, 199, 0.35) 45%, rgba(56, 189, 248, 0.15) 65%, transparent 80%)',
+                'radial-gradient(circle, rgba(29, 112, 184, 0.75) 0%, rgba(2, 132, 199, 0.52) 38%, rgba(56, 189, 248, 0.22) 60%, transparent 76%)',
             }}
           />
 
-          {/* 2. Official Hope Green Orb - Drifts freely around the center & left */}
+          {/* 2. Primary Growth Green Mass (Counter-phase convergence & divergence) */}
           <motion.div
             animate={{
-              x: [0, -50, 35, -55, 30, -25, 0],
-              y: [0, 40, -50, 25, -40, 30, 0],
-              scale: [1, 0.90, 1.18, 0.94, 1.14, 1.02, 1],
-              rotate: [0, -45, 35, -30, 40, -10, 0],
+              // Starts separate on the left -> converges to center (blends with blue) -> blooms -> diverges to right (blends away) -> returns to center -> returns to left
+              x: [-130, -20, 0, 25, 140, 40, 0, -80, -130],
+              y: [40, 15, 0, -15, -50, -20, 0, 25, 40],
+              scale: [0.95, 1.12, 1.25, 1.15, 0.90, 1.08, 1.20, 1.02, 0.95],
             }}
             transition={{
-              duration: 25,
+              duration: 20,
               repeat: Infinity,
               ease: 'easeInOut',
             }}
-            className="absolute top-[36%] left-[44%] -translate-x-1/2 -translate-y-1/2 w-[28rem] sm:w-[40rem] h-[28rem] sm:h-[40rem] rounded-full blur-[100px] sm:blur-[130px] will-change-transform"
+            className="absolute top-[35%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[36rem] sm:w-[50rem] h-[36rem] sm:h-[50rem] rounded-full blur-[130px] sm:blur-[180px] will-change-transform"
             style={{
               background:
-                'radial-gradient(circle, rgba(22, 163, 74, 0.50) 0%, rgba(34, 197, 94, 0.32) 45%, rgba(74, 222, 128, 0.15) 65%, transparent 80%)',
+                'radial-gradient(circle, rgba(22, 163, 74, 0.70) 0%, rgba(34, 197, 94, 0.46) 38%, rgba(74, 222, 128, 0.18) 60%, transparent 76%)',
             }}
           />
 
-          {/* 3. Luminous Cyan / Sky Accent - Swirls randomly across the upper center */}
+          {/* 3. Deep Cobalt & Sky Blue Reinforcement (Guarantees Equal Blue Dominance) */}
           <motion.div
             animate={{
-              x: [0, 40, -30, 50, -35, 20, 0],
-              y: [0, -30, 40, -20, 30, -40, 0],
-              scale: [1.05, 0.92, 1.15, 1, 0.94, 1.08, 1.05],
+              x: [80, -15, 0, 30, -110, 0, 80],
+              y: [-30, 20, 0, -20, 40, -10, -30],
+              scale: [1, 1.15, 1.22, 0.92, 1.10, 1.18, 1],
+              opacity: [0.75, 0.95, 1, 0.7, 0.9, 0.98, 0.75],
             }}
             transition={{
-              duration: 18,
+              duration: 22,
               repeat: Infinity,
               ease: 'easeInOut',
             }}
-            className="absolute top-[28%] left-[48%] -translate-x-1/2 -translate-y-1/2 w-[24rem] sm:w-[34rem] h-[24rem] sm:h-[34rem] rounded-full blur-[85px] sm:blur-[115px] will-change-transform"
+            className="absolute top-[30%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[32rem] sm:w-[44rem] h-[32rem] sm:h-[44rem] rounded-full blur-[120px] sm:blur-[170px] will-change-transform"
             style={{
               background:
-                'radial-gradient(circle, rgba(2, 132, 199, 0.45) 0%, rgba(14, 165, 233, 0.28) 45%, transparent 75%)',
+                'radial-gradient(circle, rgba(2, 132, 199, 0.70) 0%, rgba(29, 112, 184, 0.50) 42%, rgba(14, 165, 233, 0.20) 65%, transparent 78%)',
             }}
           />
 
-          {/* 4. Fresh Mint / Emerald Accent - Drifts gently lower behind ORGANIZATION */}
+          {/* 4. Emerald & Mint Reinforcement */}
           <motion.div
             animate={{
-              x: [0, -35, 45, -20, 40, -45, 0],
-              y: [0, 30, -35, 45, -25, 20, 0],
-              scale: [0.95, 1.12, 0.96, 1.16, 0.92, 1.06, 0.95],
+              x: [-80, 15, 0, -30, 110, 0, -80],
+              y: [30, -20, 0, 20, -40, 10, 30],
+              scale: [1, 1.15, 1.22, 0.92, 1.10, 1.18, 1],
+              opacity: [0.75, 0.95, 1, 0.7, 0.9, 0.98, 0.75],
             }}
             transition={{
-              duration: 23,
+              duration: 22,
               repeat: Infinity,
               ease: 'easeInOut',
             }}
-            className="absolute top-[44%] left-[52%] -translate-x-1/2 -translate-y-1/2 w-[26rem] sm:w-[36rem] h-[26rem] sm:h-[36rem] rounded-full blur-[95px] sm:blur-[125px] will-change-transform"
+            className="absolute top-[40%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[32rem] sm:w-[44rem] h-[32rem] sm:h-[44rem] rounded-full blur-[120px] sm:blur-[170px] will-change-transform"
             style={{
               background:
-                'radial-gradient(circle, rgba(16, 185, 129, 0.42) 0%, rgba(22, 163, 74, 0.26) 50%, transparent 75%)',
+                'radial-gradient(circle, rgba(16, 185, 129, 0.62) 0%, rgba(22, 163, 74, 0.42) 42%, rgba(34, 197, 94, 0.18) 65%, transparent 78%)',
             }}
           />
 
-          {/* 5. Central Breathing Core - Unifies the green and blue directly behind the typography */}
+          {/* 5. Central Dynamic Confluence Core (Blends directly behind "HOPE Together ORGANIZATION") */}
           <motion.div
             animate={{
-              x: [0, 25, -30, 20, -25, 0],
-              y: [0, -20, 25, -30, 20, 0],
-              scale: [1, 1.10, 0.93, 1.08, 0.96, 1],
+              scale: [0.85, 1.20, 1.35, 0.90, 1.25, 0.85],
+              opacity: [0.55, 0.95, 1, 0.5, 0.92, 0.55],
+              rotate: [0, 45, 90, 180, 270, 360],
             }}
             transition={{
-              duration: 16,
+              duration: 20,
               repeat: Infinity,
               ease: 'easeInOut',
             }}
-            className="absolute top-[38%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[22rem] sm:w-[30rem] h-[22rem] sm:h-[30rem] rounded-full blur-[75px] sm:blur-[100px] will-change-transform"
+            className="absolute top-[36%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[24rem] sm:w-[34rem] h-[24rem] sm:h-[34rem] rounded-full blur-[100px] sm:blur-[140px] will-change-transform"
             style={{
               background:
-                'radial-gradient(circle, rgba(29, 112, 184, 0.40) 0%, rgba(22, 163, 74, 0.35) 45%, transparent 72%)',
+                'radial-gradient(circle, rgba(29, 112, 184, 0.55) 0%, rgba(2, 132, 199, 0.40) 30%, rgba(22, 163, 74, 0.45) 55%, transparent 75%)',
             }}
           />
         </div>
