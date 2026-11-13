@@ -181,9 +181,6 @@ export const Footer: React.FC = () => {
           <p>© {currentYear} Hope Together Organization. All rights reserved.</p>
           <div className="flex items-center gap-6">
             <span>Khyber Pakhtunkhwa, Pakistan</span>
-            <Link to="/admin/login" className="hover:text-slate-600 transition-colors">
-              Admin Portal
-            </Link>
           </div>
         </div>
       </div>

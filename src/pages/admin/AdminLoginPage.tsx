@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
-import { Lock, Mail, ArrowRight, ShieldCheck, AlertCircle } from 'lucide-react';
+import { Lock, Mail, ArrowRight, Shield, AlertCircle, Eye, EyeOff } from 'lucide-react';
 import logoImg from '../../assets/logo.png';
 import { authService } from '../../services/authService';
 import { SEO } from '../../components/SEO';
 
 export const AdminLoginPage: React.FC = () => {
-  const [email, setEmail] = useState('admin@example.com');
-  const [password, setPassword] = useState('admin123');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -32,12 +33,6 @@ export const AdminLoginPage: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const handleFillDemo = () => {
-    setEmail('admin@example.com');
-    setPassword('admin123');
-    setError(null);
   };
 
   return (
@@ -80,17 +75,18 @@ export const AdminLoginPage: React.FC = () => {
                 htmlFor="admin-email"
                 className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2"
               >
-                Email Address
+                Official Gmail Address
               </label>
               <div className="relative">
                 <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                 <input
                   id="admin-email"
-                  type="email"
+                  type="text"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="admin@example.com"
+                  placeholder="hopetogether.org@gmail.com"
+                  autoComplete="username"
                   className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#1D70B8] transition-all"
                 />
               </div>
@@ -107,13 +103,22 @@ export const AdminLoginPage: React.FC = () => {
                 <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                 <input
                   id="admin-password"
-                  type="password"
+                  type={showPassword ? 'text' : 'password'}
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#1D70B8] transition-all"
+                  placeholder="Enter administrator password"
+                  autoComplete="current-password"
+                  className="w-full pl-10 pr-11 py-3 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#1D70B8] transition-all"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
+                  title={showPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
               </div>
             </div>
 
@@ -122,24 +127,15 @@ export const AdminLoginPage: React.FC = () => {
               disabled={isLoading}
               className="w-full inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-slate-900 text-white text-sm font-semibold hover:bg-slate-800 transition-all shadow-sm active:scale-98 disabled:opacity-70 cursor-pointer mt-2"
             >
-              <span>{isLoading ? 'Signing In...' : 'Sign In to CMS'}</span>
+              <span>{isLoading ? 'Verifying Credentials...' : 'Sign In to CMS'}</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </form>
 
-          {/* Quick Demo Fill Helper */}
-          <div className="mt-6 pt-5 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
-            <span className="flex items-center gap-1.5 font-mono text-[11px] text-slate-400">
-              <ShieldCheck className="w-3.5 h-3.5 text-[#16A34A]" />
-              Mock Auth Ready
-            </span>
-            <button
-              type="button"
-              onClick={handleFillDemo}
-              className="text-[#1D70B8] font-medium hover:underline cursor-pointer"
-            >
-              Fill Demo Credentials
-            </button>
+          {/* Security Notice */}
+          <div className="mt-6 pt-5 border-t border-slate-100 flex items-center justify-center gap-1.5 text-xs text-slate-400">
+            <Shield className="w-3.5 h-3.5 text-emerald-600" />
+            <span className="font-mono text-[11px]">Protected Portal • Authorized Leadership Only</span>
           </div>
         </div>
 
