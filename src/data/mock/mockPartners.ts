@@ -85,5 +85,16 @@ export const initialMockPartners: AdminPartner[] = [
     "displayOrder": 8,
     "isActive": true,
     "id": "partner-1794613518505"
+  },
+  {
+    "name": "CARIPD",
+    "category": "Community Partners",
+    "categorySubtitle": "",
+    "description": "",
+    "logoUrl": "/assets/partners/caripd.png",
+    "websiteUrl": "",
+    "displayOrder": 9,
+    "isActive": true,
+    "id": "partner-1794613712533"
   }
 ];
